@@ -1,1 +1,3 @@
-<Solution />
+<Solution>
+  <Project Path="SA.Web/SA.Web.csproj" />
+</Solution>

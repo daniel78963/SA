@@ -1,3 +1,9 @@
 <Solution>
-  <Project Path="SA.Web/SA.Web.csproj" />
+  <Folder Name="/scr/">
+    <Project Path="SA.Application/SA.Application.csproj" />
+    <Project Path="SA.Domain/SA.Domain.csproj" />
+    <Project Path="SA.Infrastructure/SA.Infrastructure.csproj" />
+    <Project Path="SA.WebApp/SA.WebApp.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
 </Solution>

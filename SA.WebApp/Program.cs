@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SA.Application.Interfaces;
+using SA.Application.Services;
+using SA.Domain.Identity;
+using SA.Domain.Interfaces;
+using SA.Infrastructure.Data;
+using SA.Infrastructure.Repositories;
 using SA.WebApp.Components;
 using SA.WebApp.Components.Account;
-using SA.WebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +41,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 

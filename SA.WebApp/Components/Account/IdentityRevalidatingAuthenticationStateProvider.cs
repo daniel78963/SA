@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using SA.WebApp.Data;
+using SA.Domain.Identity;
 using System.Security.Claims;
 
 namespace SA.WebApp.Components.Account

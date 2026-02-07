@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using SA.Domain.Identity;
 using SA.WebApp.Components.Account.Pages;
 using SA.WebApp.Components.Account.Pages.Manage;
-using SA.WebApp.Data;
 using System.Security.Claims;
 using System.Text.Json;
 

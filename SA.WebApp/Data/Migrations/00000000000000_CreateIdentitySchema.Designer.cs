@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SA.WebApp.Data;
+using SA.Domain.Identity;
+using SA.Infrastructure.Data;
 using System;
 
 #nullable disable

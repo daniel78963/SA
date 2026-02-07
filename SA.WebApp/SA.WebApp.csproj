@@ -19,4 +19,9 @@
     <Folder Include="Components\Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SA.Application\SA.Application.csproj" />
+    <ProjectReference Include="..\SA.Infrastructure\SA.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

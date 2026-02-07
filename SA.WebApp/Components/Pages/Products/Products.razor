@@ -1,0 +1,24 @@
+﻿@page "/products"
+@using SA.Application.DTOs
+@using SA.Application.Interfaces
+@inject IProductService ProductService
+
+<h3>Lista de Productos</h3>
+
+@if (products == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    @foreach (var prod in products)
+    {
+        <p>@prod.Name</p>
+    }
+}
+
+@code {
+    private List<ProductDto>? products;
+    protected override async Task OnInitializedAsync()
+        => products = (await ProductService.GetProductsAsync()).ToList();
+}

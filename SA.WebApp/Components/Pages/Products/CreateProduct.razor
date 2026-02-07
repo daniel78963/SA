@@ -1,0 +1,35 @@
+﻿@page "/products/create"
+@using SA.Application.DTOs
+@using SA.Application.Interfaces
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+
+<h3>Crear Producto</h3>
+
+<EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Nombre:</label>
+        <InputText class="form-control" @bind-Value="productModel.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Precio:</label>
+        <InputNumber class="form-control" @bind-Value="productModel.Price" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</EditForm>
+
+@code {
+    // Usamos el DTO, no la entidad
+    private CreateProductDto productModel = new();
+
+    private async Task HandleValidSubmit()
+    {
+        await ProductService.CreateProductAsync(productModel);
+        Navigation.NavigateTo("/products");
+    }
+}

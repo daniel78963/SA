@@ -1,4 +1,6 @@
-﻿@implements IDisposable
+﻿@using SA.WebApp.State
+@implements IDisposable
+@inject ProductStateContainer ProductState
 
 @inject NavigationManager NavigationManager
 
@@ -27,6 +29,18 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="weather">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="products">
+                <span class="bi bi-box-seam-fill" aria-hidden="true"></span> Product
+                @if (ProductState.IsLoaded)
+                {
+                    <span class="badge bg-success ms-2 rounded-pill">
+                        @ProductState.Products.Count
+                    </span>
+                }
             </NavLink>
         </div>
 
@@ -71,11 +85,23 @@
 
 @code {
     private string? currentUrl;
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
+        // currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        // NavigationManager.LocationChanged += OnLocationChanged;
+      
+        // Nos suscribimos al evento. Cada vez que alguien llame a NotifyStateChanged(),
+        // este componente se repintará.
+        ProductState.OnChange += StateHasChanged;
+        currentUrl = "";
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -86,7 +112,11 @@
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        // NavigationManager.LocationChanged -= OnLocationChanged;
+
+        // ¡CRÍTICO! Siempre desuscribirse en Dispose para evitar fugas de memoria
+        // (que el componente siga vivo en memoria aunque el usuario haya cambiado de página)
+        ProductState.OnChange -= StateHasChanged;
     }
 }
 

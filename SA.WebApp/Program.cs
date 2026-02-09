@@ -9,6 +9,7 @@ using SA.Infrastructure.Data;
 using SA.Infrastructure.Repositories;
 using SA.WebApp.Components;
 using SA.WebApp.Components.Account;
+using SA.WebApp.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,10 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+// REGISTRO DEL STATE CONTAINER
+// Usamos Scoped para que los datos vivan lo que dura la sesión del usuario en esa pestaña
+builder.Services.AddScoped<ProductStateContainer>();
 
 var app = builder.Build();
 

@@ -1,9 +1,12 @@
 ﻿@page "/products"
 @using SA.Application.DTOs
 @using SA.Application.Interfaces
+@using SA.WebApp.State
+@implements IDisposable
 @inject IProductService ProductService
+@inject ProductStateContainer ProductState
 
-<h3>Lista de Productos</h3>
+@* <h3>Lista de Productos</h3>
 
 @if (products == null)
 {
@@ -21,4 +24,79 @@ else
     private List<ProductDto>? products;
     protected override async Task OnInitializedAsync()
         => products = (await ProductService.GetProductsAsync()).ToList();
+} *@
+<h3>Gestión de Productos (Con State Container)</h3>
+
+@if (!ProductState.IsLoaded && _isLoading)
+{
+    <p><em>Cargando productos de la base de datos...</em></p>
+}
+else
+{
+    <p class="text-success">Mostrando @ProductState.Products.Count productos desde el Estado (Memoria)</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in ProductState.Products)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Price</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(product.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button class="btn btn-primary" @onclick="ReloadFromDb">Recargar de BD (Forzar)</button>
+}
+
+@code {
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Nos suscribimos al evento para que este componente se repinte si el estado cambia
+        ProductState.OnChange += StateHasChanged;
+
+        // Patrón State Container:
+        // Solo cargamos de la BD si el estado no tiene datos aún.
+        if (!ProductState.IsLoaded)
+        {
+            _isLoading = true;
+            var productsFromDb = await ProductService.GetProductsAsync();
+            ProductState.SetProducts(productsFromDb);
+            _isLoading = false;
+        }
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        // 1. Eliminamos de la Base de Datos
+        await ProductService.DeleteProductAsync(id);
+
+        // 2. Actualizamos el Estado Local (para que la UI reaccione instantáneamente sin recargar todo)
+        ProductState.RemoveProduct(id);
+    }
+
+    private async Task ReloadFromDb()
+    {
+        var products = await ProductService.GetProductsAsync();
+        ProductState.SetProducts(products);
+    }
+
+    public void Dispose()
+    {
+        // ¡IMPORTANTE! Desuscribirse para evitar fugas de memoria
+        ProductState.OnChange -= StateHasChanged;
+    }
 }

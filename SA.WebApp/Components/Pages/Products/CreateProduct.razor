@@ -2,9 +2,12 @@
 @using SA.Application.DTOs
 @using SA.Application.Interfaces
 @inject IProductService ProductService
-@inject NavigationManager Navigation
+@* @inject NavigationManager Navigation *@
+@inject NavigationManager NavigationManager
 
-<h3>Crear Producto</h3>
+@rendermode InteractiveServer
+
+@* <h3>Crear Producto</h3>
 
 <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -31,5 +34,68 @@
     {
         await ProductService.CreateProductAsync(productModel);
         Navigation.NavigateTo("/products");
+    }
+} *@
+
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-plus-square me-2"></i>Crear Nuevo Producto</h4>
+        </div>
+        <div class="card-body">
+
+            <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+                @* Activa las validaciones definidas en CreateProductDto ([Required], [Range], etc) *@
+                <DataAnnotationsValidator />
+
+                @* Muestra resumen de errores si los hay *@
+                <ValidationSummary class="alert alert-danger" role="alert" />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">Nombre del Producto</label>
+                    <InputText id="name" class="form-control" @bind-Value="productModel.Name" placeholder="Ej: Laptop Gamer" />
+                    <ValidationMessage For="@(() => productModel.Name)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label fw-bold">Precio</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <InputNumber id="price" class="form-control" @bind-Value="productModel.Price" placeholder="0.00" />
+                    </div>
+                    <ValidationMessage For="@(() => productModel.Price)" class="text-danger small" />
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i> Guardar Producto
+                    </button>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    // Inicializamos el DTO vacío
+    [SupplyParameterFromForm]
+    private CreateProductDto productModel { get; set; } = new();
+
+    private async Task HandleValidSubmit()
+    {
+        // 1. Llamamos al servicio (Capa de Aplicación)
+        await ProductService.CreateProductAsync(productModel);
+
+        // 2. Si todo sale bien, volvemos al listado
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/products");
     }
 }

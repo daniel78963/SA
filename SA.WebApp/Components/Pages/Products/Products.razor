@@ -2,9 +2,12 @@
 @using SA.Application.DTOs
 @using SA.Application.Interfaces
 @using SA.WebApp.State
-@implements IDisposable
+
 @inject IProductService ProductService
 @inject ProductStateContainer ProductState
+@inject NavigationManager NavigationManager
+@implements IDisposable
+@rendermode InteractiveServer
 
 @* <h3>Lista de Productos</h3>
 
@@ -25,6 +28,8 @@ else
     protected override async Task OnInitializedAsync()
         => products = (await ProductService.GetProductsAsync()).ToList();
 } *@
+
+@* 
 <h3>Gestión de Productos (Con State Container)</h3>
 
 @if (!ProductState.IsLoaded && _isLoading)
@@ -98,5 +103,115 @@ else
     {
         // ¡IMPORTANTE! Desuscribirse para evitar fugas de memoria
         ProductState.OnChange -= StateHasChanged;
+    }
+} *@
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>📦 Gestión de Productos</h3>
+
+        @* Botón para navegar a la pantalla de creación *@
+        <button class="btn btn-primary" @onclick="GoToCreate">
+            <i class="bi bi-plus-circle-fill me-2"></i>Nuevo Producto
+        </button>
+    </div>
+
+    @if (!ProductState.IsLoaded)
+    {
+        <div class="alert alert-info d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            <span>Cargando productos...</span>
+        </div>
+    }
+    else if (ProductState.Products.Count == 0)
+    {
+        <div class="alert alert-warning">
+            No hay productos registrados. ¡Crea el primero!
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col" class="text-end">Precio</th>
+                            <th scope="col" class="text-center" style="width: 150px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in ProductState.Products)
+                        {
+                            <tr>
+                                <td class="align-middle">@product.Name</td>
+                                <td class="align-middle text-end">@product.Price.ToString("C")</td>
+                                <td class="align-middle text-center">
+                                    <button class="btn btn-outline-danger btn-sm"
+                                            title="Eliminar"
+                                            @onclick="() => DeleteProduct(product.Id)">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mt-2 text-muted small">
+            Total registros: @ProductState.Products.Count
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Nos suscribimos al evento del State Container.
+        // Si SignalR o alguien más actualiza la lista, esta pantalla se repinta sola.
+        // ProductState.OnChange += StateHasChanged;
+
+
+        // ¡IMPORTANTE! StateHasChanged debe ejecutarse en el hilo principal de la UI. Esto corrige el error: System.InvalidOperationException: 'The current thread is not associated with the Dispatcher...'
+        // ocurre porque SignalR recibe los mensajes en un hilo de fondo (background thread), pero Blazor exige que cualquier actualización de la interfaz (StateHasChanged) ocurra en el hilo principal de la UI (Dispatcher).
+        // Usamos InvokeAsync para mover la ejecución al hilo principal de la UI
+        // ProductState.OnChange += () => InvokeAsync(StateHasChanged);
+        // Si quieres evitar problemas al desuscribirte(Dispose), es mejor crear un método privado en el componente en lugar de usar la lambda
+        ProductState.OnChange += StateHasChangedAsync;
+    }
+
+    private async void StateHasChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void GoToCreate()
+    {
+        // Navegación tipo SPA (sin recargar)
+        NavigationManager.NavigateTo("/products/create");
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        bool confirm = true; // Aquí podrías poner un SweetAlert o JS confirm
+        if (confirm)
+        {
+            // 1. Borrar de BD
+            await ProductService.DeleteProductAsync(id);
+            // 2. Actualizar Estado (UI instantánea)
+            ProductState.RemoveProduct(id);
+        }
+    }
+
+    // public void Dispose()
+    // {
+    //     // Importante: desuscribirse para evitar fugas de memoria
+    //     ProductState.OnChange -= StateHasChanged;
+    // }
+    public void Dispose()
+    {
+        ProductState.OnChange -= StateHasChangedAsync;
     }
 }

@@ -4,6 +4,9 @@
 
 @inject NavigationManager NavigationManager
 
+@* Para el contador de products *@
+@rendermode InteractiveServer
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">SA.WebApp</a>
@@ -100,8 +103,14 @@
       
         // Nos suscribimos al evento. Cada vez que alguien llame a NotifyStateChanged(),
         // este componente se repintará.
-        ProductState.OnChange += StateHasChanged;
+        // ProductState.OnChange += StateHasChanged;
+        ProductState.OnChange += StateHasChangedAsync;
         currentUrl = "";
+    }
+
+    private async void StateHasChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -116,7 +125,8 @@
 
         // ¡CRÍTICO! Siempre desuscribirse en Dispose para evitar fugas de memoria
         // (que el componente siga vivo en memoria aunque el usuario haya cambiado de página)
-        ProductState.OnChange -= StateHasChanged;
+        // ProductState.OnChange -= StateHasChanged;
+        ProductState.OnChange -= StateHasChangedAsync;
     }
 }
 

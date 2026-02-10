@@ -41,10 +41,12 @@ namespace SA.Application.Services
         //    await _productRepository.DeleteAsync(id);
         //}
         private readonly IProductRepository _productRepository;
+        private readonly INotificationService _notificationService;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, INotificationService notificationService)
         {
             _productRepository = productRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<ProductDto>> GetProductsAsync()
@@ -83,14 +85,24 @@ namespace SA.Application.Services
             };
 
             var createdProduct = await _productRepository.AddAsync(newProductEntity);
-
+             
             // Devolvemos el DTO resultante (con el ID generado)
-            return new ProductDto
+            var resultDto = new ProductDto
             {
                 Id = createdProduct.Id,
                 Name = createdProduct.Name,
                 Price = createdProduct.Price
             };
+
+            // ¡AVISAMOS A TODOS!
+            await _notificationService.NotifyProductChanged(resultDto, "Create");
+
+            return resultDto;
+        }
+
+        public async Task UpdateProductAsync(Product product)
+        {
+            await _productRepository.UpdateAsync(product);
         }
 
         public async Task DeleteProductAsync(int id)

@@ -81,10 +81,10 @@ else
 
     private async Task DeleteProduct(int id)
     {
-        // 1. Eliminamos de la Base de Datos
+        // 1. Persistencia: Eliminamos de la Base de Datos
         await ProductService.DeleteProductAsync(id);
 
-        // 2. Actualizamos el Estado Local (para que la UI reaccione instantáneamente sin recargar todo)
+        // 2. Estado UI: Actualizamos el Estado Local (para que la UI reaccione instantáneamente sin recargar todo)
         ProductState.RemoveProduct(id);
     }
 

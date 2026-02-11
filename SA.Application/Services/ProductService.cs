@@ -100,14 +100,59 @@ namespace SA.Application.Services
             return resultDto;
         }
 
-        public async Task UpdateProductAsync(Product product)
+        //public async Task UpdateProductAsync(Product product)
+        //{
+        //    await _productRepository.UpdateAsync(product);
+        //}
+
+        //public async Task DeleteProductAsync(int id)
+        //{
+        //    await _productRepository.DeleteAsync(id);
+        //}
+        public async Task UpdateProductAsync(int id, CreateProductDto productDto)
         {
+            // 1. Obtener la entidad existente
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null)
+            {
+                // Manejar error (lanzar excepción o retornar false)
+                throw new KeyNotFoundException($"Producto con ID {id} no encontrado.");
+            }
+
+            // 2. Actualizar campos
+            product.Name = productDto.Name;
+            product.Price = productDto.Price;
+
+            // 3. Guardar en BD
             await _productRepository.UpdateAsync(product);
+
+            // 4. Crear el DTO para notificar (con los datos nuevos)
+            var updatedProductDto = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price
+            };
+
+            // 5. ¡NOTIFICAR A SIGNALR! (Tipo de cambio: "Update")
+            await _notificationService.NotifyProductChanged(updatedProductDto, "Update");
         }
 
         public async Task DeleteProductAsync(int id)
         {
+            // 1. Validar si existe (opcional, dependiendo de tu repo)
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null) return;
+
+            // 2. Borrar de BD
             await _productRepository.DeleteAsync(id);
+
+            // 3. Crear un DTO dummy solo con el ID para notificar qué se borró
+            var deletedProductDto = new ProductDto { Id = id };
+
+            // 4. ¡NOTIFICAR A SIGNALR! (Tipo de cambio: "Delete")
+            await _notificationService.NotifyProductChanged(deletedProductDto, "Delete");
         }
+
     }
 }

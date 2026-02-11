@@ -14,7 +14,9 @@ namespace SA.Application.Interfaces
         Task<IEnumerable<ProductDto>> GetProductsAsync();
         Task<ProductDto?> GetProductByIdAsync(int id);
         Task<ProductDto> CreateProductAsync(CreateProductDto productDto);
+
         // Task UpdateProductAsync(UpdateProductDto productDto); // Se recomienda un DTO distinto para update
+        Task UpdateProductAsync(int id, CreateProductDto productDto); // Usamos CreateProductDto o uno específico UpdateProductDto
         Task DeleteProductAsync(int id);
     }
 }

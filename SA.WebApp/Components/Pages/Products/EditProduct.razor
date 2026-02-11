@@ -1,0 +1,69 @@
+﻿@page "/products/edit/{Id:int}"
+@using SA.Application.DTOs
+@using SA.Application.Interfaces
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Editar Producto</h3>
+
+@if (productModel == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="productModel.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Precio</label>
+            <InputNumber class="form-control" @bind-Value="productModel.Price" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancelar</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private CreateProductDto productModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var product = await ProductService.GetProductByIdAsync(Id);
+        if (product != null)
+        {
+            // Mapeamos el DTO de lectura al DTO de edición
+            productModel = new CreateProductDto
+            {
+                Name = product.Name,
+                Price = product.Price
+            };
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/products");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Llamamos al servicio (que notificará a SignalR)
+        await ProductService.UpdateProductAsync(Id, productModel);
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}

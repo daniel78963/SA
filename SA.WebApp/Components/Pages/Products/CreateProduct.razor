@@ -1,9 +1,11 @@
 ﻿@page "/products/create"
 @using SA.Application.DTOs
 @using SA.Application.Interfaces
+@using SA.WebApp.Services
 @inject IProductService ProductService
 @* @inject NavigationManager Navigation *@
 @inject NavigationManager NavigationManager
+@inject ToastService ToastService
 
 @rendermode InteractiveServer
 
@@ -90,7 +92,10 @@
         // 1. Llamamos al servicio (Capa de Aplicación)
         await ProductService.CreateProductAsync(productModel);
 
-        // 2. Si todo sale bien, volvemos al listado
+        // 2. ¡Lanzar la notificación!
+        ToastService.ShowSuccess($"¡Producto '{productModel.Name}' creado correctamente!");
+
+        // 3. Si todo sale bien, volvemos al listado
         NavigationManager.NavigateTo("/products");
     }
 

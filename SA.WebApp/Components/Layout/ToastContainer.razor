@@ -1,0 +1,91 @@
+﻿@using SA.WebApp.Services
+@implements IDisposable
+@inject ToastService ToastService
+
+@* Contenedor flotante de Bootstrap (Top-End) *@
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    @foreach (var toast in toasts)
+    {
+        <div class="toast show align-items-center text-white @GetToastClass(toast.Level) border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="@GetIconClass(toast.Level) me-2 fs-5"></i>
+                    @toast.Message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => RemoveToast(toast)"></button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // Clase interna para manejar cada mensaje individual
+    private class ToastMessage
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Message { get; set; } = "";
+        public ToastLevel Level { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
+
+    private List<ToastMessage> toasts = new();
+
+    protected override void OnInitialized()
+    {
+        // Nos suscribimos al evento del servicio
+        ToastService.OnShow += ShowToast;
+    }
+
+    private void ShowToast(string message, ToastLevel level)
+    {
+        // Usamos InvokeAsync para asegurar que corra en el hilo de UI
+        InvokeAsync(async () =>
+        {
+            var toast = new ToastMessage { Message = message, Level = level };
+            toasts.Add(toast);
+            StateHasChanged();
+
+            // Auto-ocultar después de 5 segundos
+            await Task.Delay(5000);
+            RemoveToast(toast);
+        });
+    }
+
+    private void RemoveToast(ToastMessage toast)
+    {
+        if (toasts.Contains(toast))
+        {
+            toasts.Remove(toast);
+            StateHasChanged(); // Actualizar UI
+        }
+    }
+
+    private string GetToastClass(ToastLevel level)
+    {
+        return level switch
+        {
+            ToastLevel.Success => "bg-success",
+            ToastLevel.Error => "bg-danger",
+            ToastLevel.Warning => "bg-warning",
+            ToastLevel.Info => "bg-info",
+            _ => "bg-primary"
+        };
+    }
+
+    private string GetIconClass(ToastLevel level)
+    {
+        return level switch
+        {
+            ToastLevel.Success => "bi bi-check-circle-fill",
+            ToastLevel.Error => "bi bi-exclamation-triangle-fill",
+            ToastLevel.Warning => "bi bi-exclamation-circle-fill",
+            ToastLevel.Info => "bi bi-info-circle-fill",
+            _ => "bi bi-bell-fill"
+        };
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowToast;
+    }
+}

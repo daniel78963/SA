@@ -11,6 +11,7 @@ using SA.WebApp.Components;
 using SA.WebApp.Components.Account;
 using SA.WebApp.Components.Services;
 using SA.WebApp.Hubs;
+using SA.WebApp.Services;
 using SA.WebApp.State;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +56,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 // Usamos Scoped para que los datos vivan lo que dura la sesión del usuario en esa pestaña
 builder.Services.AddScoped<ProductStateContainer>();
 builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
+
+// REGISTRO DEL SERVICIO DE TOAST
+builder.Services.AddScoped<ToastService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,61 @@
+﻿/* Sobreescribimos las variables raíz de Bootstrap */
+:root {
+    /*--bs-primary: #8e44ad;*/ /* Tu color morado */
+    --bs-primary: #5856d6; /* Tu color morado */
+    --bs-primary-rgb: 88, 86, 214;
+    --bs-body-font-family: 'Roboto', sans-serif;
+    --bs-border-radius: 10px;
+    /*font-family: 'Roboto', sans-serif;*/
+}
+
+body {
+}
+
+/* Para botones, a veces necesitas forzar la clase si Bootstrap usa !important internamente o especificidad alta */
+.btn-primary {
+    --bs-btn-bg: #8e44ad !important;
+    --bs-btn-border-color: #8e44ad;
+    background-color: #5856d6 !important;
+    border-color: #5856d6;
+    --bs-btn-hover-bg: #1b9e3e;
+    --bs-btn-hover-border-color: #4743f0;
+    
+}
+    .btn-primary:hover {
+        background-color: #4743f0 !important; /* Green background on hover */
+        color: white; /* Text color remains white on hover */
+    }
+
+.btn-success {
+    --bs-btn-bg: #1b9e3e !important;
+    --bs-btn-border-color: #1b9e3e;
+    background-color: #1b9e3e !important;
+    border-color: #1b9e3e;
+    --bs-btn-hover-bg: #1b9e3e;
+    --bs-btn-hover-border-color: #1b9e3e;
+}
+
+    /*.btn-success:hover {
+        background-color: #4743f0 !important;*/ /* Green background on hover */
+        /*color: white;*/ /* Text color remains white on hover */
+    /*}*/
+
+.btn-info {
+    --bs-btn-bg: #3399ff !important;
+    --bs-btn-border-color: #3399ff;
+    background-color: #3399ff !important;
+    border-color: #3399ff;
+    --bs-btn-hover-bg: #3399ff;
+    --bs-btn-hover-border-color: #3399ff;
+    color: white;
+}
+
+
+
+
+.custom-icon-bold {
+    -webkit-text-stroke-width: 0.5px; /* Ajusta el grosor según sea necesario */
+    -webkit-text-stroke-color: currentColor; /* Usa el color actual del texto */
+    /* Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo */
+    font-weight: bold;
+}

@@ -1,0 +1,191 @@
+﻿@page "/productsBootstrap"
+@using SA.Application.DTOs
+@using SA.Application.Interfaces
+@using SA.WebApp.State
+
+@inject IProductService ProductService
+@inject ProductStateContainer ProductState
+@inject NavigationManager NavigationManager
+
+@inject IJSRuntime JSRuntime
+
+@implements IDisposable
+@rendermode InteractiveServer
+
+<div class="mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Gestión de Productos</h4>
+
+        @* Botón para navegar a la pantalla de creación *@
+        <button class="btn btn-primary" @onclick="GoToCreate">
+            <i class="bi bi-plus-circle-fill me-2"></i>Nuevo Producto
+        </button>
+    </div>
+
+    @if (forecasts == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <Grid TItem="ProductDto"
+              Class="table table-hover table-bordered table-striped"
+              DataProvider="EmployeesDataProvider"
+              AllowFiltering="true" AllowPaging="true" PageSize="5"
+              Responsive="true">
+
+            <GridColumns>
+                <GridColumn TItem="ProductDto" HeaderText="Id" PropertyName="Id">
+                    @context.Id
+                </GridColumn>
+                <GridColumn TItem="ProductDto" HeaderText="Employee Name" PropertyName="Name">
+                    @context.Name
+                </GridColumn>
+                <GridColumn TItem="ProductDto" HeaderText="Price" PropertyName="Price">
+                    @context.Price
+                </GridColumn>
+                @*   <GridColumn TItem="ProductDto" HeaderText="DOJ" PropertyName="DOJ">
+            @context.DOJ
+        </GridColumn>
+        <GridColumn TItem="ProductDto" HeaderText="Active" PropertyName="IsActive">
+            @context.IsActive
+        </GridColumn> *@
+            </GridColumns>
+
+        </Grid>
+    }
+</div>
+ 
+@code {
+    private IEnumerable<ProductDto> forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        forecasts = new List<ProductDto>
+        {
+            new ProductDto { Id = 107, Name = "Alice", Price = 1000 },
+            new ProductDto { Id = 103, Name = "Bob", Price = 1000 },
+            new ProductDto { Id = 106, Name = "John", Price = 1000 },
+            new ProductDto { Id = 104, Name = "Pop", Price = 1000 },
+            new ProductDto { Id = 105, Name = "Ronald", Price = 1000 },
+            new ProductDto { Id = 102, Name = "Line", Price = 1000 },
+            new ProductDto { Id = 101, Name = "Daniel", Price = 1000 },
+            new ProductDto { Id = 108, Name = "Zayne", Price = 1000 },
+            new ProductDto { Id = 109, Name = "Isha", Price = 1000 },
+        };
+    }
+
+    private IEnumerable<ProductDto> employees;
+    // [Inject] public ICustomerService _customerService { get; set; } = default!;
+
+    // private async Task<GridDataProviderResult<ProductDto>> ProductsDataProvider(GridDataProviderRequest<ProductDto> request)
+    // {
+    //     string sortString = "";
+    //     SortDirection sortDirection = SortDirection.None;
+
+    //     if (request.Sorting is not null && request.Sorting.Any())
+    //     {
+    //         // Note: Multi column sorting is not supported at this moment
+    //         sortString = request.Sorting.FirstOrDefault()!.SortString;
+    //         sortDirection = request.Sorting.FirstOrDefault()!.SortDirection;
+    //     }
+    //     var result = await _customerService.GetCustomersAsync(request.Filters, request.PageNumber, request.PageSize, sortString, sortDirection, request.CancellationToken);
+    //     return await Task.FromResult(new GridDataProviderResult<ProductDto> { Data = result.Item1, TotalCount = result.Item2 });
+    // }
+
+    private async Task<GridDataProviderResult<ProductDto>> EmployeesDataProvider(GridDataProviderRequest<ProductDto> request)
+    {
+        return await Task.FromResult(request.ApplyTo(employees));
+    }
+
+    protected override void OnInitialized()
+    {
+        // Nos suscribimos al evento del State Container.
+        // Si SignalR o alguien más actualiza la lista, esta pantalla se repinta sola.
+        // ProductState.OnChange += StateHasChanged;
+
+
+        // ¡IMPORTANTE! StateHasChanged debe ejecutarse en el hilo principal de la UI. Esto corrige el error: System.InvalidOperationException: 'The current thread is not associated with the Dispatcher...'
+        // ocurre porque SignalR recibe los mensajes en un hilo de fondo (background thread), pero Blazor exige que cualquier actualización de la interfaz (StateHasChanged) ocurra en el hilo principal de la UI (Dispatcher).
+        // Usamos InvokeAsync para mover la ejecución al hilo principal de la UI
+        // ProductState.OnChange += () => InvokeAsync(StateHasChanged);
+        // Si quieres evitar problemas al desuscribirte(Dispose), es mejor crear un método privado en el componente en lugar de usar la lambda
+
+        // ProductState.OnChange += StateHasChangedAsync;
+
+        employees = new List<ProductDto>
+        {
+            new ProductDto { Id = 107, Name = "Alice", Price = 1000 },
+            new ProductDto { Id = 103, Name = "Bob", Price = 1000 },
+            new ProductDto { Id = 106, Name = "John", Price = 1000 },
+            new ProductDto { Id = 104, Name = "Pop", Price = 1000 },
+            new ProductDto { Id = 105, Name = "Ronald", Price = 1000 },
+            new ProductDto { Id = 102, Name = "Line", Price = 1000 },
+            new ProductDto { Id = 101, Name = "Daniel", Price = 1000 },
+            new ProductDto { Id = 108, Name = "Zayne", Price = 1000 },
+            new ProductDto { Id = 109, Name = "Isha", Price = 1000 },
+             new ProductDto { Id = 1071, Name = "Alice", Price = 1000 },
+            new ProductDto { Id = 1031, Name = "Bob", Price = 1000 },
+            new ProductDto { Id = 1061, Name = "John", Price = 1000 },
+            new ProductDto { Id = 1041, Name = "Pop", Price = 1000 },
+            new ProductDto { Id = 1051, Name = "Ronald", Price = 1000 },
+            new ProductDto { Id = 1021, Name = "Line", Price = 1000 },
+            new ProductDto { Id = 1011, Name = "Daniel", Price = 1000 },
+            new ProductDto { Id = 1081, Name = "Zayne", Price = 1000 },
+            new ProductDto { Id = 1091, Name = "Isha", Price = 1000 },
+             new ProductDto { Id = 1072, Name = "Alice", Price = 1000 },
+            new ProductDto { Id = 1032, Name = "Bob", Price = 1000 },
+            new ProductDto { Id = 1062, Name = "John", Price = 1000 },
+            new ProductDto { Id = 1042, Name = "Pop", Price = 1000 },
+            new ProductDto { Id = 1052, Name = "Ronald", Price = 1000 },
+            new ProductDto { Id = 1022, Name = "Line", Price = 1000 },
+            new ProductDto { Id = 1012, Name = "Daniel", Price = 1000 },
+            new ProductDto { Id = 1082, Name = "Zayne", Price = 1000 },
+            new ProductDto { Id = 1092, Name = "Isha", Price = 1000 },
+             new ProductDto { Id = 1073, Name = "Alice", Price = 1000 },
+            new ProductDto { Id = 1033, Name = "Bob", Price = 1000 },
+            new ProductDto { Id = 1063, Name = "John", Price = 1000 },
+            new ProductDto { Id = 1043, Name = "Pop", Price = 1000 },
+            new ProductDto { Id = 1053, Name = "Ronald", Price = 1000 },
+            new ProductDto { Id = 1023, Name = "Line", Price = 1000 },
+            new ProductDto { Id = 1013, Name = "Daniel", Price = 1000 },
+            new ProductDto { Id = 1083, Name = "Zayne", Price = 1000 },
+            new ProductDto { Id = 1093, Name = "Isha", Price = 1000 },
+        };
+    }
+
+    private async void StateHasChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void GoToCreate()
+    {
+        // Navegación tipo SPA (sin recargar)
+        NavigationManager.NavigateTo("/products/create");
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        bool confirm = true; // Aquí podrías poner un SweetAlert o JS confirm
+        if (confirm)
+        {
+            // 1. Borrar de BD
+            await ProductService.DeleteProductAsync(id);
+            // 2. Actualizar Estado (UI instantánea)
+            ProductState.RemoveProduct(id);
+        }
+    }
+
+    // public void Dispose()
+    // {
+    //     // Importante: desuscribirse para evitar fugas de memoria
+    //     ProductState.OnChange -= StateHasChanged;
+    // }
+    public void Dispose()
+    {
+        ProductState.OnChange -= StateHasChangedAsync;
+    }
+
+}

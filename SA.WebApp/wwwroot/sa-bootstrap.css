@@ -54,8 +54,33 @@ body {
 
 
 .custom-icon-bold {
-    -webkit-text-stroke-width: 0.5px; /* Ajusta el grosor según sea necesario */
-    -webkit-text-stroke-color: currentColor; /* Usa el color actual del texto */
-    /* Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo */
+    -webkit-text-stroke-width: 0.5px;  Ajusta el grosor según sea necesario 
+    -webkit-text-stroke-color: currentColor;  Usa el color actual del texto 
+     Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo 
     font-weight: bold;
 }
+
+/*.sidebar {
+    background-color: #343a40 !important;*/ /* Cambiar por su color */
+    /*color: white;*/ /* Color de texto */
+/*}*/
+
+
+
+/*.dropdown-menu .dropdown-menu {*/
+    /* Positions the submenu to the right of its parent */
+    /*left: 100%;
+    top: 0;
+    margin-top: 0px;
+}*/
+
+/* Optional: Add hover functionality for wider screens */
+/*@media screen and (min-width: 992px) {
+    .navbar-nav .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .navbar-nav .dropdown .dropdown-menu:hover .dropdown-menu {
+        display: block;
+    }
+}*/

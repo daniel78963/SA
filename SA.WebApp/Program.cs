@@ -60,6 +60,9 @@ builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
 // REGISTRO DEL SERVICIO DE TOAST
 builder.Services.AddScoped<ToastService>();
 
+//Blazor.Bootstrap
+builder.Services.AddBlazorBootstrap();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

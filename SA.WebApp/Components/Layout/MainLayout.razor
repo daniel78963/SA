@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using SA.WebApp.State 
+@inject ProductStateContainer ProductState
+
+<ToastContainer @rendermode="InteractiveServer" />
 
 <div class="page">
     <div class="sidebar">
@@ -21,3 +25,13 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // ¡Aquí ocurre la magia!
+        // Al cargar la estructura principal de la web, pedimos los datos a la BD.
+        // Esto actualiza el contador del menú inmediatamente.
+        await ProductState.EnsureInitializedAsync();
+    }
+}

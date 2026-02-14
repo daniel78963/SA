@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using SA.WebApp.Data;
+using SA.Domain.Identity;
 
 namespace SA.WebApp.Components.Account
 {

@@ -1,0 +1,106 @@
+﻿@page "/products/create"
+@using SA.Application.DTOs
+@using SA.Application.Interfaces
+@using SA.WebApp.Services
+@inject IProductService ProductService
+@* @inject NavigationManager Navigation *@
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+@rendermode InteractiveServer
+
+@* <h3>Crear Producto</h3>
+
+<EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Nombre:</label>
+        <InputText class="form-control" @bind-Value="productModel.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Precio:</label>
+        <InputNumber class="form-control" @bind-Value="productModel.Price" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</EditForm>
+
+@code {
+    // Usamos el DTO, no la entidad
+    private CreateProductDto productModel = new();
+
+    private async Task HandleValidSubmit()
+    {
+        await ProductService.CreateProductAsync(productModel);
+        Navigation.NavigateTo("/products");
+    }
+} *@
+
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Crear Producto</h5>
+        </div>
+        <div class="card-body">
+
+            <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+                @* Activa las validaciones definidas en CreateProductDto ([Required], [Range], etc) *@
+                <DataAnnotationsValidator />
+
+                @* Muestra resumen de errores si los hay *@
+                <ValidationSummary class="alert alert-danger" role="alert" />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">Nombre del Producto</label>
+                    <InputText id="name" class="form-control" @bind-Value="productModel.Name" placeholder="Ej: Laptop Gamer" />
+                    <ValidationMessage For="@(() => productModel.Name)" class="text-danger small" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label fw-bold">Precio</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <InputNumber id="price" class="form-control" @bind-Value="productModel.Price" placeholder="0.00" />
+                    </div>
+                    <ValidationMessage For="@(() => productModel.Price)" class="text-danger small" />
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Guardar 
+                    </button>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    // Inicializamos el DTO vacío
+    [SupplyParameterFromForm]
+    private CreateProductDto productModel { get; set; } = new();
+
+    private async Task HandleValidSubmit()
+    {
+        // 1. Llamamos al servicio (Capa de Aplicación)
+        await ProductService.CreateProductAsync(productModel);
+
+        // 2. ¡Lanzar la notificación!
+        ToastService.ShowSuccess($"¡Producto '{productModel.Name}' creado correctamente!");
+
+        // 3. Si todo sale bien, volvemos al listado
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}

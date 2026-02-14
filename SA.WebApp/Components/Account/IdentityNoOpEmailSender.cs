@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using SA.WebApp.Data;
+using SA.Domain.Identity;
+//using SA.WebApp.Data;
 
 namespace SA.WebApp.Components.Account
 {

@@ -1,10 +1,39 @@
-﻿@implements IDisposable
+﻿@using SA.WebApp.State
+@implements IDisposable
+@inject ProductStateContainer ProductState
 
 @inject NavigationManager NavigationManager
 
+@* Para el contador de products *@
+@rendermode InteractiveServer
+
+@* <div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href=""><i class="bi bi-infinity custom-icon-bold"></i>SAGA</a>
+    </div>
+</div> *@
+
+@* <div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <!-- Añadidas las clases d-flex y align-items-center -->
+        <a class="navbar-brand d-flex align-items-center" href="">
+            <!-- Añadida la clase custom-icon-bold al icono -->
+            <i class="bi bi-infinity custom-icon-bold"></i>
+            <!-- Añadida una pequeña separación a la izquierda del texto -->
+            <span class="ms-2">SAGA</span>
+        </a>
+    </div>
+</div> *@
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">SA.WebApp</a>
+        <!-- Aplica d-flex y align-items-center al enlace (a) -->
+        <a class="navbar-brand d-flex align-items-center" href="">
+            <!-- Aplica me-1 (margin-end: 0.25rem) para reducir el espacio y fw-bold para el "bold" (ver nota abajo) -->
+            <i class="bi bi-infinity me-2 fw-bold" style="font-size: 20px; top: -4px;"></i>
+            <!-- Aplica fw-bold para asegurar que el texto sea negrita -->
+            <span >SAGA</span>
+        </a>
     </div>
 </div>
 
@@ -27,6 +56,19 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="weather">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="products">
+                @* <span class="bi bi-box-seam-fill" aria-hidden="true"></span> Product *@
+                <span class="bi bi-box-fill" aria-hidden="true"></span> Product
+                @if (ProductState.IsLoaded)
+                {
+                    <span class="badge bg-success ms-2 rounded-pill">
+                        @ProductState.Products.Count
+                    </span>
+                }
             </NavLink>
         </div>
 
@@ -71,11 +113,29 @@
 
 @code {
     private string? currentUrl;
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
+        // currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        // NavigationManager.LocationChanged += OnLocationChanged;
+      
+        // Nos suscribimos al evento. Cada vez que alguien llame a NotifyStateChanged(),
+        // este componente se repintará.
+        // ProductState.OnChange += StateHasChanged;
+        ProductState.OnChange += StateHasChangedAsync;
+        currentUrl = "";
+    }
+
+    private async void StateHasChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -86,7 +146,12 @@
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        // NavigationManager.LocationChanged -= OnLocationChanged;
+
+        // ¡CRÍTICO! Siempre desuscribirse en Dispose para evitar fugas de memoria
+        // (que el componente siga vivo en memoria aunque el usuario haya cambiado de página)
+        // ProductState.OnChange -= StateHasChanged;
+        ProductState.OnChange -= StateHasChangedAsync;
     }
 }
 

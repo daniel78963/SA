@@ -1,8 +1,12 @@
 ﻿/* Sobreescribimos las variables raíz de Bootstrap */
 :root {
     /*--bs-primary: #8e44ad;*/ /* Tu color morado */
-    --bs-primary: #5856d6; /* Tu color morado */
-    --bs-primary-rgb: 88, 86, 214;
+    /*--bs-primary: #5856d6;*/ /* Tu color morado */
+    /*--bs-primary-rgb: 88, 86, 214;*/
+    /*--bs-primary: #434afa;*/ /*Azul morado*/
+    /*--bs-primary-rgb: 67, 74, 250;*/
+    --bs-primary: #0055ff; /*Azul */
+    --bs-primary-rgb: 0, 85, 255;
     --bs-body-font-family: 'Roboto', sans-serif;
     --bs-border-radius: 10px;
     /*font-family: 'Roboto', sans-serif;*/
@@ -12,7 +16,7 @@ body {
 }
 
 /* Para botones, a veces necesitas forzar la clase si Bootstrap usa !important internamente o especificidad alta */
-.btn-primary {
+/*.btn-primary {
     --bs-btn-bg: #8e44ad !important;
     --bs-btn-border-color: #8e44ad;
     background-color: #5856d6 !important;
@@ -22,7 +26,21 @@ body {
     
 }
     .btn-primary:hover {
-        background-color: #4743f0 !important; /* Green background on hover */
+        background-color: #4743f0 !important;*/ /* Green background on hover */
+        /*color: white;*/ /* Text color remains white on hover */
+    /*}*/
+
+.btn-primary {
+    --bs-btn-bg: #0055ff !important;
+    --bs-btn-border-color: #0055ff;
+    background-color: #0055ff !important;
+    border-color: #0055ff;
+    --bs-btn-hover-bg: #1b9e3e;
+    --bs-btn-hover-border-color: #4743f0;
+}
+
+    .btn-primary:hover {
+        background-color: #0055ff !important; /* Green background on hover */
         color: white; /* Text color remains white on hover */
     }
 

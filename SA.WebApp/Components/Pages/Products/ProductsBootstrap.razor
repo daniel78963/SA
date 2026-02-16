@@ -54,8 +54,51 @@
 
         </Grid>
     }
+
+    <br />
+    @if (!ProductState.IsLoaded)
+    {
+        <div class="alert alert-info d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            <span>Cargando productos...</span>
+        </div>
+    }
+    else if (ProductState.Products.Count == 0)
+    {
+        <div class="alert alert-warning">
+            No hay productos registrados. ¡Crea el primero!
+        </div>
+    }
+    else
+    {
+        <Grid TItem="ProductDto"
+              Class="table table-hover table-bordered table-striped"
+              DataProvider="ProductsDataProvider"
+              AllowFiltering="true" AllowPaging="true" PageSize="5"
+              Responsive="true">
+
+            <GridColumns>
+                <GridColumn TItem="ProductDto" HeaderText="Id" PropertyName="Id">
+                    @context.Id
+                </GridColumn>
+                <GridColumn TItem="ProductDto" HeaderText="Employee Name" PropertyName="Name">
+                    @context.Name
+                </GridColumn>
+                <GridColumn TItem="ProductDto" HeaderText="Price" PropertyName="Price">
+                    @context.Price
+                </GridColumn>
+                @*   <GridColumn TItem="ProductDto" HeaderText="DOJ" PropertyName="DOJ">
+            @context.DOJ
+        </GridColumn>
+        <GridColumn TItem="ProductDto" HeaderText="Active" PropertyName="IsActive">
+            @context.IsActive
+        </GridColumn> *@
+            </GridColumns>
+
+        </Grid>
+    }
 </div>
- 
+
 @code {
     private IEnumerable<ProductDto> forecasts;
 
@@ -99,6 +142,12 @@
         return await Task.FromResult(request.ApplyTo(employees));
     }
 
+    private async Task<GridDataProviderResult<ProductDto>> ProductsDataProvider(GridDataProviderRequest<ProductDto> request)
+    {
+        return await Task.FromResult(request.ApplyTo(ProductState.Products));
+    }
+
+
     protected override void OnInitialized()
     {
         // Nos suscribimos al evento del State Container.
@@ -112,7 +161,7 @@
         // ProductState.OnChange += () => InvokeAsync(StateHasChanged);
         // Si quieres evitar problemas al desuscribirte(Dispose), es mejor crear un método privado en el componente en lugar de usar la lambda
 
-        // ProductState.OnChange += StateHasChangedAsync;
+        ProductState.OnChange += StateHasChangedAsync;
 
         employees = new List<ProductDto>
         {

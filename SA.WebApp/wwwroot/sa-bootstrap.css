@@ -5,8 +5,8 @@
     /*--bs-primary-rgb: 88, 86, 214;*/
     /*--bs-primary: #434afa;*/ /*Azul morado*/
     /*--bs-primary-rgb: 67, 74, 250;*/
-    --bs-primary: #0055ff; /*Azul */
-    --bs-primary-rgb: 0, 85, 255;
+    --bs-primary: #0245f5; /*Azul */
+    --bs-primary-rgb: 2, 69, 245;
     --bs-body-font-family: 'Roboto', sans-serif;
     --bs-border-radius: 10px;
     /*font-family: 'Roboto', sans-serif;*/
@@ -76,6 +76,10 @@ body {
     -webkit-text-stroke-color: currentColor;  Usa el color actual del texto 
      Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo 
     font-weight: bold;
+}
+
+.sidebar {
+    background-color: #ff0000 !important;
 }
 
 /*.sidebar {

@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-<h3>Editar Producto</h3>
+<h4>Editar Producto</h4>
 
 @if (productModel == null)
 {
@@ -13,23 +13,27 @@
 }
 else
 {
-    <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <div class="card shadow" >
+        <div class="card-body">
+            <EditForm Model="@productModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-        <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <InputText class="form-control" @bind-Value="productModel.Name" />
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="productModel.Name" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Precio</label>
+                    <InputNumber class="form-control" @bind-Value="productModel.Price" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancelar</button>
+            </EditForm>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Precio</label>
-            <InputNumber class="form-control" @bind-Value="productModel.Price" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancelar</button>
-    </EditForm>
+    </div>
 }
 
 @code {

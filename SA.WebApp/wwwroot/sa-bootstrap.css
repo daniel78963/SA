@@ -19,6 +19,7 @@
 }
 
 body {
+    background-color: #f0f1f7;
 }
 
 /* Para botones, a veces necesitas forzar la clase si Bootstrap usa !important internamente o especificidad alta */

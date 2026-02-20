@@ -13,7 +13,9 @@
     --bs-border-radius: 10px;
     /*font-family: 'Roboto', sans-serif;*/
     /*--bs-primary-menu: #0a1b4d;*/ /*Azul oscuro */
-    --bs-primary-menu: #111c43; /*Azul oscuro Nightwalker*/
+    /*--bs-primary-menu: #111c43; *//*Azul oscuro Nightwalker*/
+         
+    --bs-primary-menu: linear-gradient(180deg,rgba(17, 18, 18, 1) 0%, rgba(35, 38, 37, 1) 50%, rgba(46, 45, 39, 1) 100%);
 }
 
 body {

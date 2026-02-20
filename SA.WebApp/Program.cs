@@ -59,6 +59,10 @@ builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
 
 // REGISTRO DEL SERVICIO DE TOAST
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<SweetAlertService>();
+
+//Blazor.Bootstrap
+builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 

@@ -1,18 +1,29 @@
 ﻿/* Sobreescribimos las variables raíz de Bootstrap */
 :root {
     /*--bs-primary: #8e44ad;*/ /* Tu color morado */
-    --bs-primary: #5856d6; /* Tu color morado */
-    --bs-primary-rgb: 88, 86, 214;
+    /*--bs-primary: #5856d6;*/ /* Tu color morado */
+    /*--bs-primary-rgb: 88, 86, 214;*/
+    /*--bs-primary: #434afa;*/ /*Azul morado*/
+    /*--bs-primary-rgb: 67, 74, 250;*/
+    /* --bs-primary: #0245f5;*/ /*Azul */
+    /*--bs-primary-rgb: 2, 69, 245;*/
+    --bs-primary: #5046e5; /*morado */
+    --bs-primary-rgb: 2, 69, 245;
     --bs-body-font-family: 'Roboto', sans-serif;
     --bs-border-radius: 10px;
     /*font-family: 'Roboto', sans-serif;*/
+    /*--bs-primary-menu: #0a1b4d;*/ /*Azul oscuro */
+    /*--bs-primary-menu: #111c43; *//*Azul oscuro Nightwalker*/
+         
+    --bs-primary-menu: linear-gradient(180deg,rgba(17, 18, 18, 1) 0%, rgba(35, 38, 37, 1) 50%, rgba(46, 45, 39, 1) 100%);
 }
 
 body {
+    background-color: #f0f1f7;
 }
 
 /* Para botones, a veces necesitas forzar la clase si Bootstrap usa !important internamente o especificidad alta */
-.btn-primary {
+/*.btn-primary {
     --bs-btn-bg: #8e44ad !important;
     --bs-btn-border-color: #8e44ad;
     background-color: #5856d6 !important;
@@ -22,7 +33,21 @@ body {
     
 }
     .btn-primary:hover {
-        background-color: #4743f0 !important; /* Green background on hover */
+        background-color: #4743f0 !important;*/ /* Green background on hover */
+        /*color: white;*/ /* Text color remains white on hover */
+    /*}*/
+
+.btn-primary {
+    --bs-btn-bg: #0055ff !important;
+    --bs-btn-border-color: #0055ff;
+    background-color: #0055ff !important;
+    border-color: #0055ff;
+    --bs-btn-hover-bg: #1b9e3e;
+    --bs-btn-hover-border-color: #4743f0;
+}
+
+    .btn-primary:hover {
+        background-color: #0055ff !important; /* Green background on hover */
         color: white; /* Text color remains white on hover */
     }
 
@@ -54,8 +79,34 @@ body {
 
 
 .custom-icon-bold {
-    -webkit-text-stroke-width: 0.5px; /* Ajusta el grosor según sea necesario */
-    -webkit-text-stroke-color: currentColor; /* Usa el color actual del texto */
-    /* Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo */
+    -webkit-text-stroke-width: 0.5px;  /*Ajusta el grosor según sea necesario */
+    -webkit-text-stroke-color: currentColor;  
+    /*Usa el color actual del texto  Para navegadores que no soportan -webkit-text-stroke, puedes usar font-weight si el tipo de fuente lo permite, pero es menos efectivo */
     font-weight: bold;
 }
+ 
+
+/*.sidebar {
+    background-color: #343a40 !important;*/ /* Cambiar por su color */
+    /*color: white;*/ /* Color de texto */
+/*}*/
+
+
+
+/*.dropdown-menu .dropdown-menu {*/
+    /* Positions the submenu to the right of its parent */
+    /*left: 100%;
+    top: 0;
+    margin-top: 0px;
+}*/
+
+/* Optional: Add hover functionality for wider screens */
+/*@media screen and (min-width: 992px) {
+    .navbar-nav .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .navbar-nav .dropdown .dropdown-menu:hover .dropdown-menu {
+        display: block;
+    }
+}*/

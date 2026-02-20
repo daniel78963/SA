@@ -9,12 +9,29 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    /*background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);*/
+    /*background-image: linear-gradient(180deg, #5856d6 0%, #2c0b38 70%);*/
+    /*background-image: linear-gradient(180deg, #242273 0%, #3837ab 70%);*/
+    /*background-image: linear-gradient(180deg, #151447 0%, #3837ab 70%);*/
+    /*background-image: linear-gradient(180deg, #0c0b24 0%, #211f69 70%);*/
+    /*background-color: var(--bs-primary-menu);*/
+    /*background-image: linear-gradient(180deg,rgba(17, 18, 18, 1) 0%, rgba(35, 38, 37, 1) 50%, rgba(46, 45, 39, 1) 100%);*/
+    /*background-image: linear-gradient(180deg,rgba(5, 5, 5, 1) 0%, rgba(22, 23, 26, 1) 50%, rgba(28, 30, 36, 1) 100%);*/
+    background-image: linear-gradient(180deg,rgba(28, 30, 36, 1) 0%, rgba(26, 28, 36, 1) 50%, rgba(17, 19, 26, 1) 100%);
+    /*background-color: #001F3D;*/
+    /*background-image: none;*/
+}
+
+.content {
+    /*background-color: #f0f1f7;*/
 }
 
 .top-row {
+    /*background-color: #f7f7f7;*/
+    /*background-color: #5856d6;*/
     background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    /*border top row que lo separa del body-container*/
+    /*border-bottom: 1px solid #d6d5d5;*/
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;

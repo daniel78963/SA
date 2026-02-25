@@ -1,12 +1,13 @@
 ﻿@inherits LayoutComponentBase
-@using SA.WebApp.State  
+@using SA.WebApp.State
 @inject ProductStateContainer ProductState
 
 <ToastContainer @rendermode="InteractiveServer" />
 
-@* <div class="page">
+<div class="page">
     <div class="sidebar">
         <NavMenu />
+        <NavMenu2 />
     </div>
      
     <main>
@@ -18,17 +19,17 @@
             @Body
         </article>
     </main>
-</div> *@
+</div>
 
-<div class="bb-page">
-    @* Agregamos InteractiveServer para que el menú pueda ejecutar C# y JS *@
-    <Sidebar2 @ref="sidebar"
+@* <div class="bb-page">
+     <Sidebar2 @ref="sidebar"
               @rendermode="InteractiveServer"
               Href="/"
               IconName="IconName.BootstrapFill"
               Title="SAGA"
               BadgeText="v1.0"
-              DataProvider="Sidebar2DataProvider" />
+              DataProvider="Sidebar2DataProvider"
+              Color="SidebarColor.Custom" />
 
     <main>
         <div class="bb-top-row px-4 d-flex justify-content-end">
@@ -40,7 +41,7 @@
         </article>
     </main>
 </div>
- 
+ *@
 @* <div class="bb-page">
 
     <Sidebar @ref="sidebar"
@@ -69,7 +70,7 @@
 </div>
 
 @code {
-   
+
     protected override async Task OnInitializedAsync()
     {
         // ¡Aquí ocurre la magia!
@@ -116,18 +117,63 @@
         //     new NavItem { Id = "11", Href = "/number-input", IconName = IconName.InputCursor, Text = "Number Input", ParentId="8"},
         //     new NavItem { Id = "12", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"},
         // };
+
+        // navItems = new List<NavItem>
+        // {
+        //     new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Inicio"},
+
+        //     new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Secciones" },
+        //     new NavItem { Id = "3", Href = "/products", IconName = IconName.Box, Text = "Productos", ParentId="2"},
+
+        //     new NavItem { Id = "4", IconName = IconName.ExclamationTriangleFill, Text = "Componentes" },
+        //     new NavItem { Id = "5", Href = "/alerts", IconName = IconName.CheckCircleFill, Text = "Alertas", ParentId="4"},
+
+        //     new NavItem { Id = "8", IconName = IconName.WindowPlus, Text = "Formularios" },
+        //     new NavItem { Id = "9", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"}
+        // };
+
+        // navItems = new List<NavItem>
+        // {
+        //     new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Inico"},
+
+        //     new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Content", IconColor = IconColor.Primary },
+        //     new NavItem { Id = "3", Href = "/icons", IconName = IconName.PersonSquare, Text = "Icons", ParentId="2"},
+
+        //     new NavItem { Id = "4", IconName = IconName.ExclamationTriangleFill, Text = "Components", IconColor = IconColor.Success },
+        //     new NavItem { Id = "5", Href = "/alerts", IconName = IconName.CheckCircleFill, Text = "Alerts", ParentId="4"},
+        //     new NavItem { Id = "6", Href = "/breadcrumb", IconName = IconName.SegmentedNav, Text = "Breadcrumb", ParentId="4"},
+        //     new NavItem { Id = "7", Href = "/sidebar", IconName = IconName.LayoutSidebarInset, Text = "Sidebar", ParentId="4"},
+
+        //     new NavItem { Id = "8", IconName = IconName.WindowPlus, Text = "Forms", IconColor = IconColor.Danger },
+        //     new NavItem { Id = "9", Href = "/autocomplete", IconName = IconName.InputCursorText, Text = "Auto Complete", ParentId="8"},
+        //     new NavItem { Id = "10", Href = "/currency-input", IconName = IconName.CurrencyDollar, Text = "Currency Input", ParentId="8"},
+        //     new NavItem { Id = "11", Href = "/number-input", IconName = IconName.InputCursor, Text = "Number Input", ParentId="8"},
+        //     new NavItem { Id = "12", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"},
+        // };
+
         navItems = new List<NavItem>
         {
-            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Inicio"},
+            new NavItem { Id = "0", Href = "/", IconName = IconName.HouseDoorFill, Text = "Inicio"},
+            new NavItem { Id = "1", Href = "/getting-started", IconName = IconName.HouseDoorFill, Text = "Admisiones"},
 
-            new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Secciones" },
-            new NavItem { Id = "3", Href = "/products", IconName = IconName.Box, Text = "Productos", ParentId="2"},
+            new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Content", IconColor = IconColor.Primary },
+            new NavItem { Id = "3", Href = "/icons", IconName = IconName.PersonSquare, Text = "Icons", ParentId="2" },
 
-            new NavItem { Id = "4", IconName = IconName.ExclamationTriangleFill, Text = "Componentes" },
-            new NavItem { Id = "5", Href = "/alerts", IconName = IconName.CheckCircleFill, Text = "Alertas", ParentId="4"},
+            new NavItem { Id = "4", IconName = IconName.ExclamationTriangleFill, Text = "Components", IconColor = IconColor.Success },
+            new NavItem { Id = "5", Href = "/alerts", IconName = IconName.CheckCircleFill, Text = "Alerts", ParentId="4"},
+            new NavItem { Id = "6", Href = "/breadcrumb", IconName = IconName.SegmentedNav, Text = "Breadcrumb", ParentId="4"},
+            new NavItem { Id = "7", Href = "/sidebar", IconName = IconName.LayoutSidebarInset, Text = "Sidebar", ParentId="4"},
 
-            new NavItem { Id = "8", IconName = IconName.WindowPlus, Text = "Formularios" },
-            new NavItem { Id = "9", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"}
+            new NavItem { Id = "8", IconName = IconName.WindowPlus, Text = "Forms", IconColor = IconColor.Danger },
+            new NavItem { Id = "9", Href = "/autocomplete", IconName = IconName.InputCursorText, Text = "Auto Complete", ParentId="8"},
+            new NavItem { Id = "10", Href = "/currency-input", IconName = IconName.CurrencyDollar, Text = "Currency Input", ParentId="8"},
+            new NavItem { Id = "11", Href = "/number-input", IconName = IconName.InputCursor, Text = "Number Input", ParentId="8"},
+            new NavItem { Id = "12", Href = "/switch", IconName = IconName.ToggleOn, Text = "Switch", ParentId="8"},
+
+            new NavItem { Id = "20", Href = "/getting-started", IconName = IconName.HouseDoorFill, Text = "Administrativo"},
+
+            new NavItem { Id = "2", IconName = IconName.LayoutSidebarInset, Text = "Programas", IconColor = IconColor.Primary },
+            new NavItem { Id = "3", Href = "/icons", IconName = IconName.PersonSquare, Text = "Icons", ParentId="2"},
         };
         return navItems;
     }

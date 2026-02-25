@@ -19,8 +19,27 @@
     /*font-family: 'Roboto', sans-serif;*/
     /*--bs-primary-menu: #0a1b4d;*/ /*Azul oscuro */
     /*--bs-primary-menu: #111c43; */ /*Azul oscuro Nightwalker*/
-
+    /*Menu normal of boostrap*/
     --bs-primary-menu: linear-gradient(180deg,rgba(17, 18, 18, 1) 0%, rgba(35, 38, 37, 1) 50%, rgba(46, 45, 39, 1) 100%);
+    /* 1. Color de Fondo del menú completo */
+    /*--bb-sidebar-bg: #5856d6;*/ /* Tu color morado */
+    /* 2. Color del título superior (Brand / Logo) */
+    /*--bb-sidebar-brand-text-color: #0055ff;
+    --bb-sidebar-brand-icon-color: #0055ff;*/
+    /* 3. Color de los ítems del menú (Estado Normal / Inactivo) */
+    /*--bb-sidebar-nav-item-text-color: #e0e0e0;*/ /* Un gris claro/blanco opaco */
+    /*--bb-sidebar-nav-item-icon-color: #e0e0e0;*/
+    /* 4. Color al pasar el mouse por encima (Hover) */
+    /*--bb-sidebar-nav-item-text-hover-color: #ffffff;*/ /* Letra blanca brillante */
+    /*--bb-sidebar-nav-item-icon-hover-color: #ffffff;*/ /* Ícono blanco brillante */
+    /*--bb-sidebar-nav-item-bg-hover: rgba(255, 255, 255, 0.1);*/ /* Fondo sutil al hacer hover */
+    /* 5. Color del ítem seleccionado (Activo) */
+    /*--bb-sidebar-nav-item-text-active-color: #ffffff;
+    --bb-sidebar-nav-item-icon-active-color: #ffffff;
+    --bb-sidebar-nav-item-bg-active: rgba(255, 255, 255, 0.25);*/ /* Fondo más resaltado para el ítem activo */
+
+    /*--bb-sidebar2-bg: #0055ff;*/ /* Tu color morado */
+    /*--bb-sidebar2-content: #0055ff;*/
 }
 
 body {
@@ -204,4 +223,60 @@ body {
         /* <-- Tu color morado para los títulos de las columnas */
         /*color: var(--bs-primary);*/
         font-weight: 600; /* Un poco más en negrita */
+    }
+
+
+/* =========================================
+   ESTILOS FORZADOS PARA EL SIDEBAR2
+   ========================================= */
+
+/* 1. Color de Fondo del menú completo */
+.bb-page .bb-sidebar {
+    background-color: #5856d6 !important; /* Tu color morado */
+    border-right: none !important; /* Quitar borde gris por defecto */
+}
+
+/* 2. Color del título superior (Logo / Brand) */
+.bb-sidebar .sidebar-brand,
+.bb-sidebar .navbar-brand {
+    color: #ffffff !important;
+}
+
+/* 3. Color de los ítems del menú (Estado Normal / Inactivo) */
+.bb-sidebar .nav-item .nav-link {
+    color: #e0e0e0 !important; /* Gris claro/blanco opaco */
+}
+    /* Color de los íconos inactivos */
+    .bb-sidebar .nav-item .nav-link .bb-icon,
+    .bb-sidebar .nav-item .nav-link i {
+        color: #e0e0e0 !important;
+    }
+
+    /* 4. Color al pasar el mouse por encima (Hover) */
+    .bb-sidebar .nav-item .nav-link:hover {
+        color: #ffffff !important; /* Letra blanca brillante */
+        background-color: rgba(255, 255, 255, 0.1) !important; /* Fondo sutil */
+    }
+
+        .bb-sidebar .nav-item .nav-link:hover .bb-icon,
+        .bb-sidebar .nav-item .nav-link:hover i {
+            color: #ffffff !important; /* Ícono blanco brillante */
+        }
+
+    /* 5. Color del ítem seleccionado (Activo) */
+    .bb-sidebar .nav-item .nav-link.active {
+        color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.25) !important; /* Resalte del fondo */
+        font-weight: 600 !important;
+    }
+
+        .bb-sidebar .nav-item .nav-link.active .bb-icon,
+        .bb-sidebar .nav-item .nav-link.active i {
+            color: #ffffff !important;
+        }
+
+    /* 6. Si usas sub-menús (acordeones), color de la flechita */
+    .bb-sidebar .nav-item .nav-link::after {
+        filter: invert(1) !important; /* Vuelve la flecha negra a blanca */
+        opacity: 0.8 !important;
     }

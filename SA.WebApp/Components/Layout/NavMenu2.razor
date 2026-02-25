@@ -1,0 +1,113 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <i class="bi bi-bootstrap-fill me-2"></i> SAGA
+        </a>
+        <button title="Menú de navegación" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-house-door-fill"></i> Inicio
+            </NavLink>
+        </div>
+
+        <div class="px-4 py-2 mt-2 text-uppercase section-title">
+            Secciones
+        </div>
+
+        @* =========================================
+           1. MENÚ DESPLEGABLE: PRODUCTOS
+           ========================================= *@
+        <div class="nav-item px-3">
+            <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleProducts">
+                <i class="bi bi-box"></i>
+                <span class="flex-grow-1">Productos</span>
+                <i class="bi bi-chevron-down chevron-icon @(expandProducts ? "expanded" : "")"></i>
+            </button>
+        </div>
+
+        @if (expandProducts)
+        {
+            <div class="nav-item px-3 submenu-container">
+                <nav class="flex-column ps-4">
+                    <div class="nav-item mb-0">
+                        <NavLink class="nav-link submenu-link" href="products" Match="NavLinkMatch.All">
+                            <i class="bi bi-list-ul"></i> Lista General
+                        </NavLink>
+                    </div>
+                    <div class="nav-item mb-0">
+                        <NavLink class="nav-link submenu-link" href="products/create">
+                            <i class="bi bi-plus-circle"></i> Nuevo Producto
+                        </NavLink>
+                    </div>
+                </nav>
+            </div>
+        }
+
+        @* =========================================
+           2. MENÚ DESPLEGABLE: COMPONENTES
+           ========================================= *@
+        <div class="nav-item px-3">
+            <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleComponents">
+                <i class="bi bi-puzzle"></i>
+                <span class="flex-grow-1">Componentes</span>
+                <i class="bi bi-chevron-down chevron-icon @(expandComponents ? "expanded" : "")"></i>
+            </button>
+        </div>
+
+        @if (expandComponents)
+        {
+            <div class="nav-item px-3 submenu-container">
+                <nav class="flex-column ps-4">
+                    <div class="nav-item mb-0">
+                        <NavLink class="nav-link submenu-link" href="alerts">
+                            <i class="bi bi-check-circle-fill"></i> Alertas
+                        </NavLink>
+                    </div>
+                    <div class="nav-item mb-0">
+                        <NavLink class="nav-link submenu-link" href="switch">
+                            <i class="bi bi-toggle-on"></i> Switch
+                        </NavLink>
+                    </div>
+                </nav>
+            </div>
+        }
+
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+
+    // --- VARIABLES DE ESTADO DE LOS SUBMENÚS ---
+    private bool expandProducts = false;
+    private bool expandComponents = false;
+
+    // --- MÉTODOS PARA ABRIR/CERRAR ---
+    private void ToggleProducts()
+    {
+        expandProducts = !expandProducts;
+
+        // Opcional: Si quieres que al abrir "Productos", se cierre "Componentes" automáticamente
+        // (Efecto Acordeón), descomenta la siguiente línea:
+        // expandComponents = false;
+    }
+
+    private void ToggleComponents()
+    {
+        expandComponents = !expandComponents;
+
+        // Opcional: Acordeón
+        // expandProducts = false;
+    }
+}

@@ -241,7 +241,73 @@
     </div>
 }
 
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <i class="bi bi-house-door-fill"></i> Inicio
+    </NavLink>
+</div>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="alerts">
+        <i class="bi bi-check-circle-fill"></i> Alertas
+    </NavLink>
+</div>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="weather">
+        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+    </NavLink>
+</div>
 
+@* ÍTEM PADRE (Desplegable) *@
+<div class="nav-item px-3">
+    @* Usamos un div/button con @onclick en lugar de NavLink para que no navegue, solo despliegue *@
+    <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleSystemMenu">
+        @*  <i class="bi bi-box"></i> Productos *@
+        <i class="bi bi-plus-square-fill-nav-menu"></i> Sistema
+        @*  <span>Productos</span> *@
+        @* La flechita gira dependiendo de si está abierto o cerrado *@
+        <i class="bi bi-chevron-down ms-auto" style="transition: transform 0.3s ease; transform: @(expandSistema ? "rotate(180deg)" : "rotate(0deg)")"></i>
+    </button>
+</div>
+@* SUBNIVEL (Se muestra solo si expandSistema es true) *@
+@if (expandSistema)
+{
+    <div class="nav-item px-3 submenu">
+        <nav class="flex-column ps-4">
+            @* ps-4 da la indentación (sangría) visual *@
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products" Match="NavLinkMatch.All">
+                    <i class="bi bi-person-badge-nav-menu"></i> Lista General
+                </NavLink>
+            </div>
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products/create">
+                    <i class="bi bi-person-fill-nav-menu"></i> Nuevo Producto
+                </NavLink>
+            </div>
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products/create">
+                    <i class="bi bi-plus-circle"></i> Nuevo Producto
+                </NavLink>
+            </div>
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products/create">
+                    <i class="bi bi-plus-circle"></i> Nuevo Producto
+                </NavLink>
+            </div>
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products/create">
+                    <i class="bi bi-person-fill-nav-menu"></i> Nuevo Producto
+                </NavLink>
+            </div>
+            <div class="nav-item mb-0">
+                <NavLink class="nav-link submenu-link" href="products/create">
+                    <i class="bi bi-plus-circle"></i> Nuevo Producto
+                </NavLink>
+            </div>
+        </nav>
+    </div>
+}
+ 
 
 @code {
     private string? currentUrl;
@@ -344,7 +410,8 @@
 
     // VARIABLE PARA EL SUBMENÚ
     private bool expandProducts = false;
-
+    private bool expandSistema = false;
+     
     // private void ToggleNavMenu()
     // {
     //     collapseNavMenu = !collapseNavMenu;
@@ -354,6 +421,13 @@
     private void ToggleProductsMenu()
     {
         expandProducts = !expandProducts;
+        expandSistema = false; // Cerrar el otro submenú si se abre este
+    }
+
+    private void ToggleSystemMenu()
+    {
+        expandSistema = !expandSistema;
+        expandProducts = false; // Cerrar el otro submenú si se abre este
     }
 }
 

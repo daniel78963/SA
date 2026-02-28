@@ -4,10 +4,10 @@
 
 <ToastContainer @rendermode="InteractiveServer" />
 
-<div class="page">
+@* <div class="page">
     <div class="sidebar">
         <NavMenu />
-        @* <NavMenu2 /> *@
+          <NavMenu2 />  
     </div>
      
     <main>
@@ -17,6 +17,32 @@
 
         <article class="content px-4">
             @Body
+        </article>
+    </main>
+</div> *@
+
+@* MiniSidebar *@
+<div class="page">
+    @* 1. Agregamos la clase "mini" dinámicamente si isMiniSidebar es true *@
+    <div class="sidebar @(isMiniSidebar ? "mini" : "")">
+        @* 2. Le pasamos el estado al NavMenu *@
+        <NavMenu3 IsMini="isMiniSidebar" />
+    </div>
+
+    <main>
+        @* 3. Reacomodamos el top-row para que el botón quede a la izquierda *@
+        <div class="top-row px-4 d-flex align-items-center">
+
+            @* Botón de colapso para Desktop *@
+            <button class="btn btn-link text-dark p-0 me-auto d-none d-sm-block" @onclick="ToggleSidebar" title="Colapsar menú">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            <div class="py-2">@Body</div>
         </article>
     </main>
 </div>
@@ -178,6 +204,13 @@
         return navItems;
     }
 
+    // --- LÓGICA DEL MINI SIDEBAR ---
+    private bool isMiniSidebar = false;
+
+    private void ToggleSidebar()
+    {
+        isMiniSidebar = !isMiniSidebar;
+    }
 
     // private IEnumerable<NavItem> navItems = new List<NavItem>
     // {

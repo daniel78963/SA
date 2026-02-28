@@ -158,8 +158,9 @@
         /* Never collapse the sidebar for wide screens */
         display: block;
         /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
+        height: calc(100vh - 3.5rem - 0);
         overflow-y: auto;
+        overflow-x: hidden; /* Importante para que el modo "mini" no haga scroll horizontal */
     }
 }
 
@@ -288,4 +289,20 @@ bb-sidebar2 expanded {
             margin-right: 0.8rem !important;
             font-size: 1rem !important;
         }
+}
+
+ Prevenir que los márgenes de los ítems expandan la altura y activen la barra 
+.nav-scrollable nav {
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem;  Usamos padding interno en lugar de margen externo para dar respiro al final 
+}
+
+ Esconder la barra de scroll de Windows/Chrome para que sea más estético (opcional pero recomendado en Dashboards) 
+.nav-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
 }

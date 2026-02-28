@@ -131,8 +131,28 @@
   
 @code {
     // Agrega este parámetro para recibir el estado desde MainLayout
+    // [Parameter]
+    // public bool IsMini { get; set; }
+    private bool _isMini;
+
     [Parameter]
-    public bool IsMini { get; set; }
+    public bool IsMini
+    {
+        get => _isMini;
+        set
+        {
+            // Si el estado está cambiando (se presionó el botón ToggleSidebar)
+            if (_isMini != value)
+            {
+                _isMini = value;
+
+                // FORZAMOS A QUE LOS SUBMENÚS SE CIERREN
+                expandProducts = false;
+                expandSistema = false;
+            }
+        }
+    }
+
     private string? currentUrl;
     private bool collapseNavMenu = true;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -141,7 +161,7 @@
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        collapseNavMenu = !collapseNavMenu; 
     }
 
     protected override void OnInitialized()

@@ -31,16 +31,12 @@
 
     <main>
         @* 3. Reacomodamos el top-row para que el botón quede a la izquierda *@
-        <div class="top-row pe-4 ps-0 d-flex align-items-center">
-
+        <div class="top-row pe-4 ps-0 d-flex align-items-center"> 
             @* Botón de colapso para Desktop *@ 
           @*   <button class="btn btn-link text-dark " @onclick="ToggleSidebar" title="Colapsar menú">
                 <i class="bi bi-list fs-4"></i>
-            </button> *@
-            <button class="btn btn-link text-dark p-0 me-auto d-none d-sm-block" @onclick="ToggleSidebar" title="Colapsar menú">
-                <i class="bi bi-list fs-4"></i>
-            </button>
-            <button class="btn btn-link text-dark p-0" @onclick="ToggleSidebar" title="Colapsar menú">
+            </button> *@ 
+            <button class="btn btn-link text-dark p-0 me-auto d-none d-sm-block" @onclick="ToggleSidebar" title="Colapsar menú" style="margin-left: -6px;">
                 <i class="bi bi-list fs-4"></i>
             </button>
 

@@ -82,7 +82,7 @@
             <i class="bi bi-house-door-fill"></i> <span class="menu-text">Inicio</span>
         </NavLink>
     </div>
-     
+
     @* ÍTEM PADRE (Desplegable) *@
     @* Ejemplo de link desplegable *@
     <div class="nav-item px-3">
@@ -93,7 +93,7 @@
             <i class="bi bi-chevron-down chevron-icon" style="transition: transform 0.3s ease; transform: @(expandProducts ? "rotate(180deg)" : "rotate(0deg)")"></i>
         </button>
     </div>
-     
+
     @* SUBNIVEL (Se muestra solo si expandProducts es true) *@
     @if (expandProducts)
     {
@@ -134,9 +134,40 @@
         </div>
     }
 
+    @* ÍTEM PADRE (Desplegable) *@
+    @* Ejemplo de link desplegable *@
+    <div class="nav-item px-3">
+        <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleSystemMenu">
+            <i class="bi bi-box"></i>
+            @* Fíjate en la clase menu-text aquí *@
+            <span class="flex-grow-1 menu-text">Sistema</span>
+            <i class="bi bi-chevron-down chevron-icon" style="transition: transform 0.3s ease; transform: @(expandSistema ? "rotate(180deg)" : "rotate(0deg)")"></i>
+        </button>
+    </div>
+
+    @* SUBNIVEL (Se muestra solo si expandProducts es true) *@
+    @if (expandSistema)
+    {
+        <div class="nav-item px-3 submenu">
+            <nav class="flex-column ps-4">
+                @* ps-4 da la indentación (sangría) visual *@
+                <div class="nav-item mb-0">
+                    <NavLink class="nav-link submenu-link" href="products" Match="NavLinkMatch.All">
+                        <i class="bi bi-list-ul"></i> Lista General
+                    </NavLink>
+                </div>
+                <div class="nav-item mb-0">
+                    <NavLink class="nav-link submenu-link" href="products/create">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </NavLink>
+                </div>
+            </nav>
+        </div>
+    }
+
 
 </div>
-  
+
 @code {
     // Agrega este parámetro para recibir el estado desde MainLayout
     // [Parameter]
@@ -149,17 +180,33 @@
         get => _isMini;
         set
         {
-            // Si el estado está cambiando (se presionó el botón ToggleSidebar)
+            // // Si el estado está cambiando (se presionó el botón ToggleSidebar)
+            // if (_isMini != value)
+            // {
+            //     _isMini = value;
+
+            //     // FORZAMOS A QUE LOS SUBMENÚS SE CIERREN
+            //     expandProducts = false;
+            //     expandSistema = false;
+            // }
             if (_isMini != value)
             {
                 _isMini = value;
 
-                // FORZAMOS A QUE LOS SUBMENÚS SE CIERREN
-                expandProducts = false;
-                expandSistema = false;
+                // IMPORTANTE: Ahora solo forzamos a cerrar los submenús
+                // si la barra SE ESTÁ COMPRIMIENDO (valor true).
+                if (_isMini)
+                {
+                    expandProducts = false;
+                    expandSistema = false;
+                }
             }
         }
     }
+
+    // Este parámetro es obligatorio para que funcione el @bind-IsMini
+    [Parameter]
+    public EventCallback<bool> IsMiniChanged { get; set; }
 
     private string? currentUrl;
     private bool collapseNavMenu = true;
@@ -169,7 +216,7 @@
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu; 
+        collapseNavMenu = !collapseNavMenu;
     }
 
     protected override void OnInitialized()
@@ -269,16 +316,39 @@
     // }
 
     // MÉTODO PARA ABRIR/CERRAR SUBMENÚ
-    private void ToggleProductsMenu()
+    private async Task ToggleProductsMenu()
     {
-        expandProducts = !expandProducts;
-        expandSistema = false; // Cerrar el otro submenú si se abre este
+        // expandProducts = !expandProducts;
+        // expandSistema = false; // Cerrar el otro submenú si se abre este
+        if (IsMini)
+        {
+            // Si estaba mini, le decimos al MainLayout que expanda la barra
+            await IsMiniChanged.InvokeAsync(false);
+            // Y nos aseguramos de que este submenú quede abierto al expandirse
+            expandProducts = true;
+        }
+        else
+        {
+            // Comportamiento normal si ya estaba expandido
+            expandProducts = !expandProducts;
+            expandSistema = false; // Cerrar el otro submenú si se abre este
+        }
     }
 
-    private void ToggleSystemMenu()
+    private async Task ToggleSystemMenu()
     {
-        expandSistema = !expandSistema;
-        expandProducts = false; // Cerrar el otro submenú si se abre este
+        // expandSistema = !expandSistema;
+        // expandProducts = false; Cerrar el otro submenú si se abre este
+        if (IsMini)
+        {
+            await IsMiniChanged.InvokeAsync(false);
+            expandSistema = true;
+        }
+        else
+        {
+            expandSistema = !expandSistema;
+            expandProducts = false; // Cerrar el otro submenú si se abre este
+        }
     }
 }
 

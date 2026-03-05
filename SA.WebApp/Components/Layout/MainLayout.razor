@@ -26,7 +26,8 @@
     @* 1. Agregamos la clase "mini" dinámicamente si isMiniSidebar es true *@
     <div class="sidebar @(isMiniSidebar ? "mini" : "")">
         @* 2. Le pasamos el estado al NavMenu *@
-        <NavMenu3 IsMini="isMiniSidebar" />
+        @* @bind- le indica a Blazor que la variable puede ser modificada desde adentro del hijo. *@
+        <NavMenu3 @bind-IsMini="isMiniSidebar" />
     </div>
 
     <main>

@@ -44,23 +44,23 @@ main {
         text-decoration: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+        .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+            text-decoration: underline;
+        }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+        .top-row ::deep a:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+        .top-row ::deep a, .top-row ::deep .btn-link {
+            margin-left: 0;
+        }
 }
 
 @media (min-width: 641px) {
@@ -73,21 +73,36 @@ main {
         height: 100vh;
         position: sticky;
         top: 0;
+        /*MiniSidebar*/
+        /* Agregamos una transición suave al colapsar/expandir */
+        transition: width 0.3s ease-in-out;
+        z-index: 1040;
+        overflow-x: hidden; /* Evita que salga barra de desplazamiento al comprimir */
     }
+        /* ESTE ES EL ANCHO DEL MENÚ COMPRIMIDO */
+        .sidebar.mini {
+            width: 80px;
+        }
 
     .top-row {
         position: sticky;
         top: 0;
-        z-index: 10;
+        /*z-index: 10;*/
+        z-index: 1030;
     }
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+        .top-row.auth ::deep a:first-child {
+            flex: 1;
+            text-align: right;
+            width: 0;
+        }
 
     .top-row, article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+
+    main > article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }

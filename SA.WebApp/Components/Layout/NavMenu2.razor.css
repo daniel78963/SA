@@ -1,0 +1,72 @@
+﻿/* =========================================
+   ESTILOS ESPECÍFICOS PARA SUBMENÚS
+   ========================================= */
+
+/* Títulos de agrupación */
+.section-title {
+    font-size: 0.75rem;
+    color: #b3b2e6;
+    font-weight: bold;
+}
+
+/* Restablecer estilos de botones nativos para que parezcan links */
+.nav-item ::deep button.nav-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Contenedor del submenú: Fondo apenas más oscuro para diferenciarlo */
+.submenu-container {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 8px 8px;
+    margin-top: -0.5rem; /* Sube un poco para pegarse al botón padre */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Link hijo (Submenú) */
+.nav-item ::deep .submenu-link {
+    height: 2.5rem !important; /* Más delgado que el menú principal */
+    font-size: 0.9rem;
+    color: #c5c4f3 !important; /* Letra un poco más opaca */
+    transition: all 0.2s ease-in-out;
+}
+
+    /* Ícono del link hijo */
+    .nav-item ::deep .submenu-link i {
+        font-size: 1rem !important; /* Ícono más pequeño */
+        margin-right: 0.7rem !important;
+    }
+
+    /* Efecto Hover en el submenú (Se desplaza un poco a la derecha) */
+    .nav-item ::deep .submenu-link:hover {
+        color: #ffffff !important;
+        background-color: transparent !important;
+        transform: translateX(6px);
+    }
+
+    /* Cuando el link hijo está activo (Pantalla actual) */
+    .nav-item ::deep .submenu-link.active {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+
+        .nav-item ::deep .submenu-link.active i {
+            color: #ffffff !important;
+        }
+
+/* =========================================
+   ANIMACIÓN DE LA FLECHA (CHEVRON)
+   ========================================= */
+.chevron-icon {
+    transition: transform 0.3s ease-in-out;
+    font-size: 0.85rem !important; /* Flechita más sutil */
+    margin-right: 0 !important; /* Quita el margen derecho por defecto */
+}
+
+    /* Esta clase se añade por C# cuando expandimos el menú */
+    .chevron-icon.expanded {
+        transform: rotate(180deg);
+    }

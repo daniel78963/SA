@@ -1,4 +1,6 @@
 ﻿@page "/products"
+@attribute [Authorize(Roles = "Administrador, Gerente")]
+@using Microsoft.AspNetCore.Authorization
 @using SA.Application.DTOs
 @using SA.Application.Interfaces
 @using SA.WebApp.State

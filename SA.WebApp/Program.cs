@@ -51,7 +51,8 @@ builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddTransient<IEmailSender<ApplicationUser>, SA.Infrastructure.Services.EmailSender>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 // REGISTRO DEL STATE CONTAINER

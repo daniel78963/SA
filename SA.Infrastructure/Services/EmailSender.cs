@@ -1,0 +1,51 @@
+﻿using Microsoft.AspNetCore.Identity;
+using SA.Domain.Identity;
+using System.Net;
+using System.Net.Mail;
+
+namespace SA.Infrastructure.Services
+{
+    public class EmailSender : IEmailSender<ApplicationUser>
+    {
+        // Idealmente, inyecta IConfiguration para leer estos valores del appsettings.json
+        private readonly string smtpServer = "smtp.gmail.com";
+        private readonly int port = 587;
+        private readonly string emailFrom = "onsaledaniel78963@gmail.com";
+        private readonly string password = "onsaledaniel1.$";
+
+        public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
+        {
+            await SendEmailAsync(email, "Confirma tu cuenta", $"Por favor confirma tu cuenta haciendo clic aquí: <a href='{confirmationLink}'>link</a>");
+        }
+
+        public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
+        {
+            await SendEmailAsync(email, "Restablecer contraseña", $"Restablece tu contraseña haciendo clic aquí: <a href='{resetLink}'>link</a>");
+        }
+
+        public async Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
+        {
+            await SendEmailAsync(email, "Código para restablecer contraseña", $"Tu código es: {resetCode}");
+        }
+
+        private async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
+        {
+            using var client = new SmtpClient(smtpServer, port)
+            {
+                Credentials = new NetworkCredential(emailFrom, password),
+                EnableSsl = true
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(emailFrom),
+                Subject = subject,
+                Body = htmlMessage,
+                IsBodyHtml = true
+            };
+            mailMessage.To.Add(toEmail);
+
+            await client.SendMailAsync(mailMessage);
+        }
+    }
+}

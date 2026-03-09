@@ -1,0 +1,81 @@
+﻿@page "/security/users"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SA.Domain.Identity
+@inject UserManager<ApplicationUser> UserManager
+@attribute [Authorize(Roles = "Administrador")]
+
+<h3>Gestión de Usuarios</h3>
+
+<table class="table table-striped table-hover mt-3">
+    <thead>
+        <tr>
+            <th>Email / Usuario</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    @if (IsLockedOut(user))
+                    {
+                        <span class="badge bg-danger">Bloqueado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                </td>
+                <td>
+                    @if (IsLockedOut(user))
+                    {
+                        <button class="btn btn-sm btn-outline-success" @onclick="() => ToggleLockout(user)">Desbloquear</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => ToggleLockout(user)">Bloquear</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<ApplicationUser> users = new();
+
+    protected override void OnInitialized()
+    {
+        LoadUsers();
+    }
+
+    private void LoadUsers()
+    {
+        users = UserManager.Users.ToList();
+    }
+
+    private bool IsLockedOut(ApplicationUser user)
+    {
+        return user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now;
+    }
+
+    private async Task ToggleLockout(ApplicationUser user)
+    {
+        if (IsLockedOut(user))
+        {
+            // Desbloquear: Quitar la fecha de fin de bloqueo
+            await UserManager.SetLockoutEndDateAsync(user, null);
+        }
+        else
+        {
+            // Bloquear: Poner una fecha en el futuro lejano (ej. 100 años)
+            await UserManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+        }
+
+        LoadUsers(); // Recargar la lista
+    }
+}

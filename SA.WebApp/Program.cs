@@ -40,6 +40,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        options.Lockout.AllowedForNewUsers = true; //Importante: Para que el bloqueo funcione, la cuenta debe tener habilitado el Lockout.
     })
     .AddRoles<IdentityRole>() // <-- Para restringir a roles específicos, si lo necesitas
     .AddEntityFrameworkStores<ApplicationDbContext>()

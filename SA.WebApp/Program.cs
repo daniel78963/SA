@@ -93,4 +93,45 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 app.MapHub<ProductHub>("/productHub"); // Mapeamos la ruta del Hub
 
+// ==========================================
+// SEED DE ROLES Y SUPER USUARIO
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // 1. Crear roles por defecto si no existen
+    string[] roleNames = { "Administrador", "Gerente", "Usuario" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    // 2. Crear el usuario Administrador por defecto
+    var adminEmail = "admin@saga.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        var newAdmin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true // Evita que pida confirmación por correo
+        };
+
+        var createPowerUser = await userManager.CreateAsync(newAdmin, "Admin123*");
+        if (createPowerUser.Succeeded)
+        {
+            // Asignar el rol al usuario recién creado
+            await userManager.AddToRoleAsync(newAdmin, "Administrador");
+        }
+    }
+}
+
 app.Run();

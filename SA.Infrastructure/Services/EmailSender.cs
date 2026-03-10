@@ -11,7 +11,7 @@ namespace SA.Infrastructure.Services
         private readonly string smtpServer = "smtp.gmail.com";
         private readonly int port = 587;
         private readonly string emailFrom = "onsaledaniel78963@gmail.com";
-        private readonly string password = "onsaledaniel1.$";
+        private readonly string password = "mqoerwffooeaupoi";
 
         public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
         {
@@ -32,6 +32,8 @@ namespace SA.Infrastructure.Services
         {
             using var client = new SmtpClient(smtpServer, port)
             {
+                // IMPORTANTE: Esto debe ir ANTES de asignar las credenciales. Si no lo haces, algunos servidores rebotan la petición.
+                UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(emailFrom, password),
                 EnableSsl = true
             };

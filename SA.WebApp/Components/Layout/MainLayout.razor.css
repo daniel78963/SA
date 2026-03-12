@@ -128,3 +128,85 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+
+
+
+/* =========================================
+   MENÚ HORIZONTAL SUPERIOR
+   ========================================= */
+.top-horizontal-menu .nav-link {
+    color: #4a4a4a;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease-in-out;
+}
+
+    .top-horizontal-menu .nav-link:hover {
+        color: #5856d6; /* Tu color morado corporativo */
+    }
+
+/* =========================================
+   AVATAR DEL USUARIO
+   ========================================= */
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #5856d6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(88, 86, 214, 0.3);
+}
+
+/* =========================================
+   DESPLEGABLE DE SESIÓN (DROPDOWN DE BOOTSTRAP)
+   ========================================= */
+.user-dropdown-menu {
+    min-width: 250px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 0; /* Quitamos el padding para que la línea divisoria toque los bordes */
+    overflow: hidden; /* Mantiene los bordes redondeados */
+    /* Agrega esta línea para forzar que baje */
+    margin-top: 55px !important;
+}
+
+/* Animación nativa para cuando Bootstrap añade la clase 'show' */
+.dropdown-menu.show {
+    animation: dropIn 0.2s ease-out forwards;
+}
+
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-dropdown-menu .dropdown-item {
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    transition: all 0.2s;
+}
+
+    .user-dropdown-menu .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #5856d6; /* Tu color morado */
+        padding-left: 1.8rem !important; /* Desplazamiento sutil */
+    }
+
+    /* Resalte rojo para el botón de Cerrar Sesión */
+    .user-dropdown-menu .dropdown-item.text-danger:hover {
+        background-color: #ffeef0;
+        color: #dc3545 !important;
+    }

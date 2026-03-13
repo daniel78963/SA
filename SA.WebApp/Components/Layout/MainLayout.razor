@@ -32,9 +32,10 @@
 
     <main>
         @* 3. Reacomodamos el top-row para que el botón quede a la izquierda *@
-        <div class="top-row pe-4 ps-0 d-flex align-items-center">
-            @* Botón de colapso para Desktop *@ 
-          @*   <button class="btn btn-link text-dark " @onclick="ToggleSidebar" title="Colapsar menú">
+        @* <div class="top-row pe-4 ps-0 d-flex align-items-center"> *@
+        <nav class="top-row navbar navbar-expand-md pe-4 ps-2 w-100">
+            @* Botón de colapso para Desktop *@
+            @*   <button class="btn btn-link text-dark " @onclick="ToggleSidebar" title="Colapsar menú">
                 <i class="bi bi-list fs-4"></i>
             </button> *@ 
             <button class="btn btn-link text-dark p-0 me-auto d-none d-sm-block" @onclick="ToggleSidebar" title="Colapsar menú" style="margin-left: -6px;">
@@ -46,13 +47,15 @@
             @* <NavBarTop /> *@
             @* </div> *@
 
+            @* <NavBarTop /> *@
+
             @* CONTENEDOR DEL MENÚ HORIZONTAL (Alineado a la derecha) *@
             <div class="d-flex align-items-center justify-content-end flex-grow-1">
 
                 @* 1. Opciones Horizontales Normales (Ejemplo) *@
                 <div class="d-none d-md-flex align-items-center me-4 top-horizontal-menu">
-                    <NavLink class="nav-link px-3" href="help"><i class="bi bi-question-circle me-1"></i> Ayuda</NavLink>
-                    <NavLink class="nav-link px-3" href="settings"><i class="bi bi-gear me-1"></i> Ajustes</NavLink>
+                    <NavLink class="nav-link px-1" href="help"><i class="bi bi-question-circle me-1"></i> Ayuda</NavLink>
+                    <NavLink class="nav-link px-1" href="settings"><i class="bi bi-gear me-1"></i> Ajustes</NavLink>
                 </div>
 
                 @* 2. Menú de Sesión del Usuario *@
@@ -63,7 +66,7 @@
 
                             @* Cambiamos el @onclick por data-bs-toggle="dropdown" *@
                             <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0"
-                                    data-bs-toggle="dropdown" aria-expanded="false" >
+                                    data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="avatar-circle me-2">
                                     @(context.User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
                                 </div>
@@ -110,7 +113,8 @@
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
-        </div>
+        @* </div> *@
+        </nav>
 
         <article class="content px-4">
             <div class="py-2">@Body</div>

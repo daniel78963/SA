@@ -26,16 +26,25 @@ main {
     /*background-color: #f0f1f7;*/
 }
 
-.top-row {
+/*.top-row {*/
     /*background-color: #f7f7f7;*/
     /*background-color: #5856d6;*/
-    background-color: #f7f7f7;
+    /*background-color: #f7f7f7;*/
     /*border top row que lo separa del body-container*/
     /*border-bottom: 1px solid #d6d5d5;*/
-    justify-content: flex-end;
+    /*justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
+}*/
+.top-row {
+    background-color: #f7f7f7;
+    /* Cambiamos height por min-height para que crezca hacia abajo al abrir el acordeón */
+    min-height: 3.5rem;
+    height: auto;
+    display: flex;
+    align-items: center;
+    z-index: 1030;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
@@ -210,3 +219,16 @@ main {
         background-color: #ffeef0;
         color: #dc3545 !important;
     }
+
+/* Evitar que el dropdown del usuario tenga animación flotante y sombras excesivas en móviles, 
+   para que se comporte 100% como un acordeón nativo */
+@media (max-width: 767.98px) {
+    .user-dropdown-menu {
+        border: none !important;
+        box-shadow: none !important;
+        /*  background-color: transparent !important;*/
+        background-color: #fff !important;
+        margin-top: 0 !important;
+        animation: none !important;
+    }
+}

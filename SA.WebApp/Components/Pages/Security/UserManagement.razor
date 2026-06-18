@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @using SA.Domain.Identity
 @using Microsoft.EntityFrameworkCore
+@inject SA.WebApp.Services.SweetAlertService Swal
 @inject UserManager<ApplicationUser> UserManager
 @inject RoleManager<IdentityRole> RoleManager
 @* Solo los administradores pueden entrar a esta página *@
@@ -84,6 +85,14 @@
                                     <span class="badge bg-secondary mt-1" title="Cuenta de sistema protegida">
                                         <i class="bi bi-shield-check"></i> Protegido
                                     </span>
+                                }
+
+                                @if (item.User.Email != "daniel78963@gmail.com")
+                                {
+                                    <button class="btn btn-sm btn-outline-danger ms-2" title="Eliminar Usuario"
+                                            @onclick="() => DeleteUser(item.User)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
                                 }
                             </td>
                         </tr>
@@ -238,5 +247,38 @@
 
         CloseRoleModal();
         await LoadUsersData(); // Recargar la tabla para ver los cambios
+    }
+
+    private async Task DeleteUser(ApplicationUser user)
+    {
+        // 🛡️ DOBLE PROTECCIÓN: No eliminar al SuperAdmin
+        if (user.Email == "admin@saga.com") return;
+
+        // 1. Lanzar la alerta de confirmación con SweetAlert
+        bool confirmado = await Swal.ConfirmDeleteAsync(
+            title: "¿Eliminar usuario?",
+            text: $"¿Estás seguro de que deseas eliminar permanentemente a {user.Email}?",
+            confirmButtonText: "Sí, eliminar"
+        );
+
+        // 2. Si el usuario cancela en el popup, detenemos el proceso
+        if (!confirmado) return;
+
+        // 3. Si aceptó, procedemos con la eliminación
+        var result = await UserManager.DeleteAsync(user);
+
+        if (result.Succeeded)
+        {
+            await LoadUsersData(); // Recarga la tabla
+
+            // 4. Mostrar el Toast de éxito en la esquina superior
+            await Swal.ShowToastSuccessAsync("Usuario eliminado correctamente.");
+        }
+        else
+        {
+            // 5. Mostrar popup de error si algo falla en Identity
+            var errores = string.Join(" | ", result.Errors.Select(e => e.Description));
+            await Swal.ShowErrorAsync("No se pudo eliminar", errores);
+        }
     }
 }

@@ -113,7 +113,8 @@ using (var scope = app.Services.CreateScope())
     }
 
     // 2. Crear el usuario Administrador por defecto
-    var adminEmail = "admin@saga.com";
+    //var adminEmail = "admin@saga.com";
+    var adminEmail = "daniel78963@gmail.com";    
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
     if (adminUser == null)

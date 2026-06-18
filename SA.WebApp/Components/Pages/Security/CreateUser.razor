@@ -1,0 +1,132 @@
+﻿@page "/security/users/create"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SA.Domain.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavigationManager
+@* Protegemos la ruta para que solo entre el Administrador *@
+@attribute [Authorize(Roles = "Administrador")]
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="d-flex align-items-center mb-4">
+                <a href="security/users" class="btn btn-outline-secondary me-3" title="Volver">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h3 class="text-primary mb-0"><i class="bi bi-person-plus-fill me-2"></i>Crear Nuevo Usuario</h3>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    
+                    <EditForm Model="newUser" OnValidSubmit="CreateUserAsync">
+                        <DataAnnotationsValidator />
+                        
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger p-3 mb-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Correo Electrónico <span class="text-danger">*</span></label>
+                            <InputText class="form-control form-control-lg" @bind-Value="newUser.Email" placeholder="usuario@saga.com" autocomplete="off" />
+                            <ValidationMessage For="@(() => newUser.Email)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Contraseña Temporal <span class="text-danger">*</span></label>
+                            <InputText type="password" class="form-control form-control-lg" @bind-Value="newUser.Password" placeholder="********" autocomplete="new-password" />
+                            <ValidationMessage For="@(() => newUser.Password)" class="text-danger small mt-1" />
+                            <div class="form-text mt-2">
+                                La contraseña debe tener al menos 6 caracteres, incluir una mayúscula, un número y un carácter especial.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Asignar Rol Inicial</label>
+                            <InputSelect class="form-select form-select-lg" @bind-Value="newUser.SelectedRole">
+                                <option value="">-- Sin Rol Específico --</option>
+                                @foreach (var role in allRoles)
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </InputSelect>
+                            <div class="form-text mt-1">Podrás gestionar roles adicionales más adelante.</div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="security/users" class="btn btn-light btn-lg border">Cancelar</a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-save me-1"></i> Guardar Usuario
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private class CreateUserModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El correo es obligatorio.")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Debes ingresar un correo válido.")]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria.")]
+        public string Password { get; set; } = string.Empty;
+
+        public string SelectedRole { get; set; } = string.Empty;
+    }
+
+    private CreateUserModel newUser = new();
+    private List<string> allRoles = new();
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar los roles disponibles para el select
+        allRoles = await RoleManager.Roles.Select(r => r.Name!).ToListAsync();
+    }
+
+    private async Task CreateUserAsync()
+    {
+        errorMessage = null;
+
+        var user = new ApplicationUser 
+        { 
+            UserName = newUser.Email, 
+            Email = newUser.Email,
+            EmailConfirmed = true // Se marca verificado porque lo crea el admin
+        };
+
+        var result = await UserManager.CreateAsync(user, newUser.Password);
+
+        if (result.Succeeded)
+        {
+            if (!string.IsNullOrEmpty(newUser.SelectedRole))
+            {
+                await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+            }
+
+            // Éxito: Redirigimos de vuelta a la lista de usuarios
+            NavigationManager.NavigateTo("/security/users");
+        }
+        else
+        {
+            // Error: Mostrar los mensajes de validación de Identity (ej. "Password too short")
+            errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+        }
+    }
+}

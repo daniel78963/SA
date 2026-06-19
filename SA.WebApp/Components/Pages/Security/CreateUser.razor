@@ -27,7 +27,7 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     
-                    <EditForm Model="newUser" OnValidSubmit="CreateUserSAGAAsync">
+                    <EditForm Model="newUser" OnValidSubmit="CreateUserTransactionsAsync">
                         <DataAnnotationsValidator />
                         
                         @if (!string.IsNullOrEmpty(errorMessage))
@@ -219,6 +219,108 @@
             // Si hay una desconexión, falla la BD o se rompe una llave foránea en SagaContext
             errorMessage = "Ocurrió un error inesperado. Ningún cambio fue guardado en el sistema.";
             Console.WriteLine($"Error crítico en transacción: {ex.Message}");
+        }
+    }
+
+    private async Task CreateUserTransactionsAsync()
+    {
+        errorMessage = null;
+        Domain.Entities.SA.Persona? personaCreada = null;
+        Domain.Entities.SA.Docente? docenteCreado = null;
+        using var SagaContext = DbFactory.CreateDbContext();
+
+        try
+        { 
+            newUser.Identificacion = "123456789012345";
+            newUser.FechaIngreso = DateTime.Now;
+            newUser.ChangePassword = true;
+
+            // ==========================================
+            // 1. PASO ERP (SagaContext)
+            // ==========================================
+            personaCreada = new Domain.Entities.SA.Persona
+            {
+                Identificacion = newUser.Identificacion,
+                Usuario = newUser.Email,
+                FechaIngreso = newUser.FechaIngreso,
+                CambiarContrasena = newUser.ChangePassword
+                //...
+            };
+
+            SagaContext.Personas.Add(personaCreada);
+            await SagaContext.SaveChangesAsync(); // Se guarda y obtiene su ID
+
+            // if (newUser.SelectedRole == "Docente")
+            // {
+            //     docenteCreado = new Domain.Entities.SA.Docente { Id = personaCreada.Id, Estado = true };
+            //     SagaContext.Docentes.Add(docenteCreado);
+            //     await SagaContext.SaveChangesAsync();
+            // }
+
+            // ==========================================
+            // 2. PASO SEGURIDAD (UserManager)
+            // ==========================================
+            var user = new ApplicationUser
+            {
+                UserName = newUser.Email,
+                Email = newUser.Email,
+                EmailConfirmed = true,
+                PersonaId = personaCreada.PersonaId // Enlace suave
+            };
+
+            var result = await UserManager.CreateAsync(user, newUser.Password);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                {
+                    await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                }
+
+                // ÉXITO TOTAL: Redirigimos
+                NavigationManager.NavigateTo("/security/users");
+            }
+            else
+            {
+                // ERROR EN IDENTITY (ej. contraseña débil): Iniciamos ROLLBACK MANUAL
+                errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+                await RollbackErpAsync(personaCreada, docenteCreado);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Ocurrió un error inesperado. Revisa tu conexión.";
+            Console.WriteLine($"Error: {ex.Message}");
+
+            // Si falló en la mitad del proceso, intentamos limpiar la basura
+            await RollbackErpAsync(personaCreada, docenteCreado);
+        }
+    }
+
+    // Método de limpieza (Compensación)
+    private async Task RollbackErpAsync(Domain.Entities.SA.Persona? persona, Domain.Entities.SA.Docente? docente)
+    {
+        try
+        {
+            using var SagaContext = DbFactory.CreateDbContext();
+            if (docente != null)
+            {
+                SagaContext.Docentes.Remove(docente);
+            }
+            if (persona != null)
+            {
+                SagaContext.Personas.Remove(persona);
+            }
+
+            if (persona != null || docente != null)
+            {
+                await SagaContext.SaveChangesAsync();
+            }
+        }
+        catch (Exception rollbackEx)
+        {
+            // Solo logueamos si el rollback falla (ej. si la BD se cayó por completo)
+            Console.WriteLine($"Error crítico en Rollback: {rollbackEx.Message}");
         }
     }
 }

@@ -300,6 +300,9 @@
     // Método de limpieza (Compensación)
     private async Task RollbackErpAsync(Domain.Entities.SA.Persona? persona, Domain.Entities.SA.Docente? docente)
     {
+        //patrón llamado "Transacciones de Compensación" (si el paso B falla, ejecuto un código para deshacer manualmente el paso A).
+        // Patrón SAGA: Es el flujo de orquestación o coreografía que agrupa estas transacciones locales. SAGA dicta en qué orden 
+        // deben ejecutarse y coordina el disparo de las compensaciones si alguna falla
         try
         {
             using var SagaContext = DbFactory.CreateDbContext();

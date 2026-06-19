@@ -232,3 +232,30 @@ main {
         animation: none !important;
     }
 }
+
+/* =========================================
+   ESTILOS DEL LOADING OVERLAY GLOBAL
+   ========================================= */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.55); /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(4px); /* Difumina ligeramente lo que está detrás */
+    z-index: 9999; /* Asegura que tape menús, modales y cualquier cosa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-container {
+    text-align: center;
+}
+
+/* Sombra para el texto blanco sobre el fondo desenfocado */
+.text-shadow {
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+}

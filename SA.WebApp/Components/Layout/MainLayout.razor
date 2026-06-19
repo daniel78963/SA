@@ -1,8 +1,28 @@
 ﻿@inherits LayoutComponentBase
 @using SA.WebApp.State
+@using SA.WebApp.Services @* Importamos los servicios *@
+@implements IDisposable //Obligatorio para limpiar eventos y evitar fugas de memoria 
 @inject ProductStateContainer ProductState
+@inject LoadingService LoadingService  //Inyectamos el cargando centralizado  
 
 <ToastContainer @rendermode="InteractiveServer" />
+
+@* ==========================================
+   SPINNER CENTRALIZADO GLOBAL OVERLAY
+   ========================================== *@
+@if (LoadingService.IsLoading)
+{
+    <div class="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner-border text-primary" role="status" style="width: 3.5rem; height: 3.5rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mt-3 text-white fw-bold text-shadow">
+                Processing request...
+            </h5>
+        </div>
+    </div>
+}
 
 @* <div class="page">
     <div class="sidebar">
@@ -180,6 +200,15 @@
         // Al cargar la estructura principal de la web, pedimos los datos a la BD.
         // Esto actualiza el contador del menú inmediatamente.
         await ProductState.EnsureInitializedAsync();
+
+        // Nos suscribimos al evento del servicio de carga
+        LoadingService.OnStateChanged += StateHasChanged;
+    }
+
+    // Liberamos los eventos cuando el layout se destruya
+    public void Dispose()
+    {
+        LoadingService.OnStateChanged -= StateHasChanged;
     }
 
     // private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)

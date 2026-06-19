@@ -8,6 +8,8 @@
 @inject RoleManager<IdentityRole> RoleManager
 @* Solo los administradores pueden entrar a esta página *@
 @attribute [Authorize(Roles = "Administrador")]
+@inject SA.WebApp.Services.LoadingService LoadingService
+@inject SA.WebApp.Services.SweetAlertService Swal
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -191,16 +193,30 @@
             return;
         }
 
-        var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now;
-        if (isLocked)
+        LoadingService.Show();
+        await Task.Delay(5000);
+        try
         {
-            await UserManager.SetLockoutEndDateAsync(user, null); // Desbloquear
+            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now;
+            if (isLocked)
+            {
+                await UserManager.SetLockoutEndDateAsync(user, null); // Desbloquear
+            }
+            else
+            {
+                await UserManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue); // Bloquear permanente
+            }
+            await LoadUsersData();
         }
-        else
+        catch (Exception ex)
         {
-            await UserManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue); // Bloquear permanente
+            await Swal.ShowErrorAsync("Error", "Ocurrió una falla en el servidor.");
         }
-        await LoadUsersData();
+        finally
+        {
+            // 3. Desbloqueamos el sistema
+            LoadingService.Hide();
+        }
     }
 
     // --- Lógica del Modal de Roles ---
@@ -264,21 +280,35 @@
         // 2. Si el usuario cancela en el popup, detenemos el proceso
         if (!confirmado) return;
 
-        // 3. Si aceptó, procedemos con la eliminación
-        var result = await UserManager.DeleteAsync(user);
+        LoadingService.Show();
 
-        if (result.Succeeded)
+        try
         {
-            await LoadUsersData(); // Recarga la tabla
+            // 3. Si aceptó, procedemos con la eliminación
+            var result = await UserManager.DeleteAsync(user);
 
-            // 4. Mostrar el Toast de éxito en la esquina superior
-            await Swal.ShowToastSuccessAsync("Usuario eliminado correctamente.");
+            if (result.Succeeded)
+            {
+                await LoadUsersData(); // Recarga la tabla
+
+                // 4. Mostrar el Toast de éxito en la esquina superior
+                await Swal.ShowToastSuccessAsync("Usuario eliminado correctamente.");
+            }
+            else
+            {
+                // 5. Mostrar popup de error si algo falla en Identity
+                var errores = string.Join(" | ", result.Errors.Select(e => e.Description));
+                await Swal.ShowErrorAsync("No se pudo eliminar", errores);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            // 5. Mostrar popup de error si algo falla en Identity
-            var errores = string.Join(" | ", result.Errors.Select(e => e.Description));
-            await Swal.ShowErrorAsync("No se pudo eliminar", errores);
+            await Swal.ShowErrorAsync("Error", "Ocurrió una falla en el servidor.");
+        }
+        finally
+        {
+            // 3. Desbloqueamos el sistema
+            LoadingService.Hide();
         }
     }
 }

@@ -9,6 +9,7 @@
 @inject NavigationManager NavigationManager
 @* @inject SA.Domain.Entities.SA.SagaContext SagaContext *@
 @inject IDbContextFactory<SA.Domain.Entities.SA.SagaContext> DbFactory
+@inject SA.WebApp.Services.LoadingService LoadingService
 
 @* Protegemos la ruta para que solo entre el Administrador *@
 @attribute [Authorize(Roles = "Administrador")]
@@ -225,6 +226,7 @@
     private async Task CreateUserTransactionsAsync()
     {
         errorMessage = null;
+        LoadingService.Show();
         Domain.Entities.SA.Persona? personaCreada = null;
         Domain.Entities.SA.Docente? docenteCreado = null;
         using var SagaContext = DbFactory.CreateDbContext();
@@ -294,6 +296,10 @@
 
             // Si falló en la mitad del proceso, intentamos limpiar la basura
             await RollbackErpAsync(personaCreada, docenteCreado);
+        }
+        finally
+        { 
+            LoadingService.Hide();
         }
     }
 

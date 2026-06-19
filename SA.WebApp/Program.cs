@@ -69,6 +69,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 // Usamos Scoped para que los datos vivan lo que dura la sesión del usuario en esa pestaña
 builder.Services.AddScoped<ProductStateContainer>();
 builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
+builder.Services.AddScoped<SA.WebApp.Services.LoadingService>();
 
 // REGISTRO DEL SERVICIO DE TOAST
 builder.Services.AddScoped<ToastService>();

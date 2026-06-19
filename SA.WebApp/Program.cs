@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SA.Application.Interfaces;
 using SA.Application.Services;
+using SA.Domain.Entities.SA;
 using SA.Domain.Identity;
 using SA.Domain.Interfaces;
 using SA.Infrastructure.Data;
@@ -13,6 +14,8 @@ using SA.WebApp.Components.Services;
 using SA.WebApp.Hubs;
 using SA.WebApp.Services;
 using SA.WebApp.State;
+// using SA.Domain.Entities.SA;
+// using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +35,13 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var sagaConnectionString = builder.Configuration.GetConnectionString("SAGA") ?? throw new InvalidOperationException("Connection string 'SagaConnection' not found.");
+
+//builder.Services.AddDbContext<SagaContext>(options =>
+//    options.UseSqlServer(sagaConnectionString));
+//Solve error: A second operation started on this context before a previous operation completed"
+builder.Services.AddDbContextFactory<SagaContext>(options =>
+    options.UseSqlServer(sagaConnectionString));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString), ServiceLifetime.Transient);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

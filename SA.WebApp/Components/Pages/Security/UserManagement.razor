@@ -184,7 +184,7 @@
     private async Task ToggleLockout(ApplicationUser user)
     {
         // 🛡️ DOBLE PROTECCIÓN: Evitar bloqueo desde el código C#
-        if (user.Email == "admin@saga.com")
+        if (user.Email == "daniel78963@gmail.com")
         {
             // Aquí podrías usar tu SweetAlertService o ToastService para mostrar un error,
             // pero con el 'return' basta para abortar la acción silenciosamente.
@@ -252,7 +252,7 @@
     private async Task DeleteUser(ApplicationUser user)
     {
         // 🛡️ DOBLE PROTECCIÓN: No eliminar al SuperAdmin
-        if (user.Email == "admin@saga.com") return;
+        if (user.Email == "daniel78963@gmail.com") return;
 
         // 1. Lanzar la alerta de confirmación con SweetAlert
         bool confirmado = await Swal.ConfirmDeleteAsync(

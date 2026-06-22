@@ -282,17 +282,18 @@
 
         // 2. Si el usuario cancela en el popup, detenemos el proceso
         if (!confirmado) return;
-
-        LoadingService.Show();
-
+                
         try
         {
             // 3. Si aceptó, procedemos con la eliminación
+            LoadingService.Show();
+
             var result = await UserManager.DeleteAsync(user);
 
             if (result.Succeeded)
             {
                 await LoadUsersData(); // Recarga la tabla
+                LoadingService.Hide();
 
                 // 4. Mostrar el Toast de éxito en la esquina superior
                 await Swal.ShowToastSuccessAsync("Usuario eliminado correctamente.");

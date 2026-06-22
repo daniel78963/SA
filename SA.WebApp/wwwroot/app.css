@@ -1,3 +1,7 @@
+:root {
+    --main-color: #5046e5;
+    --gray-color: #101010;
+}
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -132,3 +136,18 @@ h1:focus {
     color: #e81c45;
     font-family: "Segoe UI", Tahoma;
 }
+
+/* =========================================
+   Defaults
+   ========================================= */
+
+h1 {
+    font-family: Tahoma, "Segoe UI", Arial;
+    color: var(--main-color);
+}
+
+p {
+    font-family: "Segoe UI", Tahoma, Arial;
+    color: #4F4D4D;
+}
+

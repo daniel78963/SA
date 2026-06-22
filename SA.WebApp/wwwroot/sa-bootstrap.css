@@ -280,3 +280,19 @@ body {
         filter: invert(1) !important; /* Vuelve la flecha negra a blanca */
         opacity: 0.8 !important;
     }
+
+
+/* =========================================
+   links
+   ========================================= */
+
+.nav-link {
+    font-family: "Segoe UI", Tahoma, Arial;
+    color: var(--gray-color);
+}
+
+a {
+    font-family: "Segoe UI", Tahoma, Arial;
+    color: var(--gray-color);
+    /*font-weight: 500;*/
+}

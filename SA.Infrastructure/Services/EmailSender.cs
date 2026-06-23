@@ -40,12 +40,36 @@ namespace SA.Infrastructure.Services
 
         public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
         {
-            await SendEmailAsync(email, "Restablecer contraseña", $"Restablece tu contraseña haciendo clic aquí: <a href='{resetLink}'>link</a>");
+            //await SendEmailAsync(email, "Restablecer contraseña", $"Restablece tu contraseña haciendo clic aquí: <a href='{resetLink}'>link</a>");
+            // 1. Ubicamos el archivo HTML
+            var templatePath = Path.Combine(_env.ContentRootPath, "EmailTemplates", "ResetPasswordLink.html");
+
+            // 2. Leemos el contenido
+            var htmlBody = await File.ReadAllTextAsync(templatePath);
+
+            // 3. Reemplazamos las variables dinámicas
+            htmlBody = htmlBody.Replace("{{UserEmail}}", email);
+            htmlBody = htmlBody.Replace("{{ResetLink}}", resetLink);
+
+            // 4. Enviamos el correo
+            await SendEmailAsync(email, "Restablecer contraseña en SAGA", htmlBody);
         }
 
         public async Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
         {
-            await SendEmailAsync(email, "Código para restablecer contraseña", $"Tu código es: {resetCode}");
+            //await SendEmailAsync(email, "Código para restablecer contraseña", $"Tu código es: {resetCode}");
+            // 1. Ubicamos el archivo HTML
+            var templatePath = Path.Combine(_env.ContentRootPath, "EmailTemplates", "ResetPasswordCode.html");
+
+            // 2. Leemos el contenido
+            var htmlBody = await File.ReadAllTextAsync(templatePath);
+
+            // 3. Reemplazamos las variables dinámicas
+            htmlBody = htmlBody.Replace("{{UserEmail}}", email);
+            htmlBody = htmlBody.Replace("{{ResetCode}}", resetCode);
+
+            // 4. Enviamos el correo
+            await SendEmailAsync(email, "Tu código de seguridad SAGA", htmlBody);
         }
 
         private async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)

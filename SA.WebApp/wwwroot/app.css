@@ -146,6 +146,11 @@ h1 {
     color: var(--main-color);
 }
 
+h2, h3, h4 {
+    font-family: Tahoma, "Segoe UI", Arial;
+    color: var(--main-color);
+}
+
 p {
     font-family: "Segoe UI", Tahoma, Arial;
     color: #4F4D4D;

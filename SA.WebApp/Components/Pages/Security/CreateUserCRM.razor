@@ -1,0 +1,347 @@
+﻿@page "/security/users/createCRM"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SA.Domain.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Transactions
+@using System.ComponentModel.DataAnnotations
+@using SA.Domain.Entities.SA
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavigationManager
+@inject SA.Domain.Entities.SA.SagaContext SagaContext
+@inject IDbContextFactory<SA.Domain.Entities.SA.SagaContext> DbFactory
+@inject SA.WebApp.Services.LoadingService LoadingService
+@attribute [Authorize(Roles = "Administrador")]
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+
+            <div class="d-flex align-items-center mb-4">
+                <a href="security/users" class="btn btn-outline-secondary me-3" title="Volver">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h3 class="text-primary mb-0"><i class="bi bi-person-plus-fill me-2"></i>Crear Usuario y Registro de Persona</h3>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <EditForm Model="newUser" OnValidSubmit="CreateUserAsync">
+                        <DataAnnotationsValidator />
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger p-3 mb-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+                            </div>
+                        }
+
+                        @* MENÚ DE PESTAÑAS (TABS) *@
+                        <ul class="nav nav-tabs mb-4" id="formTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold" id="account-tab" data-bs-toggle="tab" data-bs-target="#account-pane" type="button" role="tab">
+                                    <i class="bi bi-shield-lock me-2"></i>1. Datos de Cuenta
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal-pane" type="button" role="tab">
+                                    <i class="bi bi-person-vcard me-2"></i>2. Información Personal
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="location-tab" data-bs-toggle="tab" data-bs-target="#location-pane" type="button" role="tab">
+                                    <i class="bi bi-geo-alt me-2"></i>3. Ubicación
+                                </button>
+                            </li>
+                        </ul>
+
+                        @* CONTENIDO DE LAS PESTAÑAS *@
+                        <div class="tab-content" id="formTabsContent">
+
+                            @* PESTAÑA 1: DATOS DE CUENTA *@
+                            <div class="tab-pane fade show active" id="account-pane" role="tabpanel" aria-labelledby="account-tab">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Correo Electrónico <span class="text-danger">*</span></label>
+                                        <InputText class="form-control" @bind-Value="newUser.Email" placeholder="usuario@saga.com" autocomplete="off" />
+                                        <ValidationMessage For="@(() => newUser.Email)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Contraseña Temporal <span class="text-danger">*</span></label>
+                                        <InputText type="password" class="form-control" @bind-Value="newUser.Password" placeholder="********" autocomplete="new-password" />
+                                        <ValidationMessage For="@(() => newUser.Password)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Rol Inicial en el Sistema</label>
+                                        <InputSelect class="form-select" @bind-Value="newUser.SelectedRole">
+                                            <option value="">-- Seleccionar Rol --</option>
+                                            @foreach (var role in allRoles)
+                                            {
+                                                <option value="@role">@role</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* PESTAÑA 2: INFORMACIÓN PERSONAL *@
+                            <div class="tab-pane fade" id="personal-pane" role="tabpanel" aria-labelledby="personal-tab">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Número de Documento <span class="text-danger">*</span></label>
+                                        <InputText class="form-control" @bind-Value="newUser.Documento" placeholder="Ej: 10203040" />
+                                        <ValidationMessage For="@(() => newUser.Documento)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tipo de Persona <span class="text-danger">*</span></label>
+                                        <InputSelect class="form-select" @bind-Value="newUser.TipoPersonaId">
+                                            <option value="">-- Seleccionar Tipo --</option>
+                                            @foreach (var tipo in tiposPersona)
+                                            {
+                                                <option value="@tipo.TiposPersonaId">@tipo.Descripcion</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => newUser.TipoPersonaId)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Nombres <span class="text-danger">*</span></label>
+                                        <InputText class="form-control" @bind-Value="newUser.Nombres" placeholder="Nombres completos" />
+                                        <ValidationMessage For="@(() => newUser.Nombres)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Apellidos <span class="text-danger">*</span></label>
+                                        <InputText class="form-control" @bind-Value="newUser.Apellidos" placeholder="Apellidos completos" />
+                                        <ValidationMessage For="@(() => newUser.Apellidos)" class="text-danger small" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* PESTAÑA 3: UBICACIÓN *@
+                            <div class="tab-pane fade" id="location-pane" role="tabpanel" aria-labelledby="location-tab">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">País</label>
+                                        <select class="form-select" @onchange="OnPaisChanged">
+                                            <option value="">-- Seleccionar País --</option>
+                                            @foreach (var p in paises)
+                                            {
+                                                <option value="@p.PaisId">@p.Descripcion</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Departamento</label>
+                                        <select class="form-select" disabled="@(!departamentosFiltrados.Any())" @onchange="OnDepartamentoChanged">
+                                            <option value="">-- Seleccionar Departamento --</option>
+                                            @foreach (var d in departamentosFiltrados)
+                                            {
+                                                <option value="@d.DepartamentoId">@d.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Municipio <span class="text-danger">*</span></label>
+                                        <InputSelect class="form-select" disabled="@(!municipiosFiltrados.Any())" @bind-Value="newUser.MunicipioId">
+                                            <option value="">-- Seleccionar Municipio --</option>
+                                            @foreach (var m in municipiosFiltrados)
+                                            {
+                                                <option value="@m.MunicipioId">@m.Descripcion</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => newUser.MunicipioId)" class="text-danger small" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="security/users" class="btn btn-light border">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-1"></i> Guardar Todo
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private class CreateUserModel
+    {
+        // Seguridad
+        [Required(ErrorMessage = "El correo es obligatorio.")]
+        [EmailAddress(ErrorMessage = "Correo inválido.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La contraseña es obligatoria.")]
+        public string Password { get; set; } = string.Empty;
+        public string SelectedRole { get; set; } = string.Empty;
+
+        // Datos Personales
+        [Required(ErrorMessage = "El documento es obligatorio.")]
+        public string Documento { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El tipo de persona es obligatorio.")]
+        public int? TipoPersonaId { get; set; }
+
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public string Nombres { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
+        public string Apellidos { get; set; } = string.Empty;
+
+        // Ubicación
+        [Required(ErrorMessage = "El municipio es obligatorio.")]
+        public int? MunicipioId { get; set; }
+
+        // System
+        public DateTime FechaIngreso { get; set; } = DateTime.Now;
+        public bool ChangePassword { get; set; } = false;
+    }
+
+    private CreateUserModel newUser = new();
+    private List<string> allRoles = new();
+    private string? errorMessage;
+
+    // Listas maestras para los desplegables (Reemplazar con tus entidades reales de dominio)
+    private List<TiposPersona> tiposPersona = new();
+    private List<PaisesCrm> paises = new();
+    private List<DepartamentosCrm> departamentosFiltrados = new();
+    private List<MunicipiosCrm> municipiosFiltrados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allRoles = await RoleManager.Roles.Select(r => r.Name!).ToListAsync();
+
+        // Carga inicial de datos maestros desde el ERP
+        tiposPersona = await SagaContext.TiposPersonas.ToListAsync();
+        paises = await SagaContext.PaisesCrms.ToListAsync();
+    }
+
+    // GESTIÓN DE DESPLEGABLES EN CASCADA
+    private async Task OnPaisChanged(ChangeEventArgs e)
+    {
+        departamentosFiltrados.Clear();
+        municipiosFiltrados.Clear();
+        newUser.MunicipioId = null;
+
+        if (int.TryParse(e.Value?.ToString(), out int paisId))
+        {
+            departamentosFiltrados = await SagaContext.DepartamentosCrms
+                .Where(d => d.PaisId == paisId)
+                .ToListAsync();
+        }
+    }
+
+    private async Task OnDepartamentoChanged(ChangeEventArgs e)
+    {
+        municipiosFiltrados.Clear();
+        newUser.MunicipioId = null;
+
+        if (int.TryParse(e.Value?.ToString(), out int deptoId))
+        {
+            municipiosFiltrados = await SagaContext.MunicipiosCrms
+                .Where(m => m.DepartamentoId == deptoId)
+                .ToListAsync();
+        }
+    }
+
+    private async Task CreateUserAsync()
+    {
+        errorMessage = null;
+        LoadingService.Show();
+
+        // Implementación de la transacción unificada (Compensación Manual recomendada)
+        Persona? personaCreada = null;
+
+        try
+        { 
+            newUser.FechaIngreso = DateTime.Now;
+            newUser.ChangePassword = true;
+
+            // 1. Crear registro en el ERP
+            personaCreada = new Persona
+            {
+                Identificacion = newUser.Documento,
+                Usuario = newUser.Email,
+                FechaIngreso = newUser.FechaIngreso,
+                CambiarContrasena = newUser.ChangePassword,
+                PrimerNombre = newUser.Nombres,
+                PrimerApellido = newUser.Apellidos,
+                // TipoPersonaId = newUser.TipoPersonaId!.Value,
+                // MunicipioId = newUser.MunicipioId!.Value
+            };
+
+            SagaContext.Personas.Add(personaCreada);
+            await SagaContext.SaveChangesAsync();
+
+            // // Lógica condicional si es docente o estudiante según el rol/tipo elegido
+            // if (newUser.SelectedRole == "Docente")
+            // {
+            //     SagaContext.Docentes.Add(new Docente { Id = personaCreada.Id, Estado = true });
+            //     await SagaContext.SaveChangesAsync();
+            // }
+
+            // 2. Crear usuario de Seguridad vinculado
+            var user = new ApplicationUser
+            {
+                UserName = newUser.Email,
+                Email = newUser.Email,
+                EmailConfirmed = true,
+                PersonaId = personaCreada.PersonaId
+            };
+
+            var result = await UserManager.CreateAsync(user, newUser.Password);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                {
+                    await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                }
+
+                NavigationManager.NavigateTo("/security/users");
+            }
+            else
+            {
+                errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+                await RollbackErpAsync(personaCreada);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error crítico al guardar en el sistema de base de datos.";
+            await RollbackErpAsync(personaCreada);
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
+    }
+
+    private async Task RollbackErpAsync(Persona? persona)
+    {
+        if (persona == null) return;
+        try
+        {
+            // Remover registros dependientes creados en esta sesión antes de fallar por completo
+            var docente = await SagaContext.Docentes.FindAsync(persona.PersonaId);
+            if (docente != null) SagaContext.Docentes.Remove(docente);
+
+            if (persona != null)
+            {
+                SagaContext.Personas.Remove(persona);
+            }
+            await SagaContext.SaveChangesAsync();
+        }
+        catch { /* Silenciar excepciones de rollback */ }
+    }
+}

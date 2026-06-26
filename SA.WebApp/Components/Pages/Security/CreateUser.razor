@@ -17,7 +17,7 @@
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            
+
             <div class="d-flex align-items-center mb-4">
                 <a href="security/users" class="btn btn-outline-secondary me-3" title="Volver">
                     <i class="bi bi-arrow-left"></i>
@@ -27,10 +27,10 @@
 
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    
-                    <EditForm Model="newUser" OnValidSubmit="CreateUserTransactionsAsync">
+
+                    <EditForm Model="newUser" OnValidSubmit="CreateUserAsync">
                         <DataAnnotationsValidator />
-                        
+
                         @if (!string.IsNullOrEmpty(errorMessage))
                         {
                             <div class="alert alert-danger p-3 mb-4">
@@ -68,9 +68,9 @@
                         <hr class="my-4" />
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="security/users" class="btn btn-light btn-lg border">Cancelar</a>
-                            <button type="submit" class="btn btn-primary btn-lg px-4">
-                                <i class="bi bi-save me-1"></i> Guardar Usuario
+                            <a href="security/users" class="btn btn-light btn-md border">Cancelar</a>
+                            <button type="submit" class="btn btn-primary btn-md px-4">
+                                <i class="bi bi-save me-1"></i> Guardar
                             </button>
                         </div>
                     </EditForm>
@@ -96,7 +96,7 @@
 
         public string Identificacion { get; set; } = string.Empty;
         public DateTime FechaIngreso { get; set; } = DateTime.Now;
-        public bool ChangePassword { get; set; } = false;  
+        public bool ChangePassword { get; set; } = false;
     }
 
     private CreateUserModel newUser = new();
@@ -111,31 +111,45 @@
 
     private async Task CreateUserAsync()
     {
+        LoadingService.Show();
         errorMessage = null;
 
-        var user = new ApplicationUser 
-        { 
-            UserName = newUser.Email, 
+        var user = new ApplicationUser
+        {
+            UserName = newUser.Email,
             Email = newUser.Email,
             EmailConfirmed = true // Se marca verificado porque lo crea el admin
         };
 
-        var result = await UserManager.CreateAsync(user, newUser.Password);
-
-        if (result.Succeeded)
+        try
         {
-            if (!string.IsNullOrEmpty(newUser.SelectedRole))
+
+            var result = await UserManager.CreateAsync(user, newUser.Password);
+
+            if (result.Succeeded)
             {
-                await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
-            }
+                if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                {
+                    await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                }
 
-            // Éxito: Redirigimos de vuelta a la lista de usuarios
-            NavigationManager.NavigateTo("/security/users");
+                // Éxito: Redirigimos de vuelta a la lista de usuarios
+                NavigationManager.NavigateTo("/security/users");
+            }
+            else
+            {
+                // Error: Mostrar los mensajes de validación de Identity (ej. "Password too short")
+                errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+            }
         }
-        else
+        catch (Exception ex)
         {
-            // Error: Mostrar los mensajes de validación de Identity (ej. "Password too short")
-            errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+            errorMessage = "Ocurrió un error inesperado. Revisa tu conexión.";
+            Console.WriteLine($"Error: {ex.Message}"); 
+        }
+        finally
+        {
+            LoadingService.Hide();
         }
     }
 
@@ -163,7 +177,7 @@
                     FechaIngreso = newUser.FechaIngreso,
                     CambiarContrasena = newUser.ChangePassword
                     //...
-                }; 
+                };
 
                 using var SagaContext = DbFactory.CreateDbContext();
                 SagaContext.Personas.Add(nuevaPersona);
@@ -232,7 +246,7 @@
         using var SagaContext = DbFactory.CreateDbContext();
 
         try
-        { 
+        {
             newUser.Identificacion = "123456789012345";
             newUser.FechaIngreso = DateTime.Now;
             newUser.ChangePassword = true;
@@ -298,7 +312,7 @@
             await RollbackErpAsync(personaCreada, docenteCreado);
         }
         finally
-        { 
+        {
             LoadingService.Hide();
         }
     }
@@ -307,7 +321,7 @@
     private async Task RollbackErpAsync(Domain.Entities.SA.Persona? persona, Domain.Entities.SA.Docente? docente)
     {
         //patrón llamado "Transacciones de Compensación" (si el paso B falla, ejecuto un código para deshacer manualmente el paso A).
-        // Patrón SAGA: Es el flujo de orquestación o coreografía que agrupa estas transacciones locales. SAGA dicta en qué orden 
+        // Patrón SAGA: Es el flujo de orquestación o coreografía que agrupa estas transacciones locales. SAGA dicta en qué orden
         // deben ejecutarse y coordina el disparo de las compensaciones si alguna falla
         try
         {

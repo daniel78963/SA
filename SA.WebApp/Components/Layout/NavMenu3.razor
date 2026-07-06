@@ -105,16 +105,20 @@
                         <i class="bi bi-list-ul"></i> Lista General
                     </NavLink>
                 </div>
-                <div class="nav-item mb-0">
-                    <NavLink class="nav-link submenu-link" href="Products">
-                        <i class="bi bi-plus-circle"></i> Nuevo Producto
-                    </NavLink>
-                </div>
+                <AuthorizeView Roles="Administrador, Gerente">
+                    <Authorized>
+                        <div class="nav-item mb-0">
+                            <NavLink class="nav-link submenu-link" href="Products">
+                                <i class="bi bi-plus-circle"></i> Lista General Restricted
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
                 <div class="nav-item mb-0">
                     <NavLink class="nav-link submenu-link" href="products/create">
                         <i class="bi bi-person-fill"></i> Nuevo Producto
                     </NavLink>
-                </div> 
+                </div>
             </nav>
         </div>
     }
@@ -149,7 +153,15 @@
             </nav>
         </div>
     }
-
+    <AuthorizeView Roles="Administrador">
+        <Authorized>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="security/users" Match="NavLinkMatch.All">
+                    <i class="bi bi-person-badge"></i> <span class="menu-text">Users</span>
+                </NavLink>
+            </div>
+        </Authorized>
+    </AuthorizeView>
 
 </div>
 

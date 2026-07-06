@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SA.Application.Interfaces;
 using SA.Application.Services;
+using SA.Domain.Entities.SA;
 using SA.Domain.Identity;
 using SA.Domain.Interfaces;
 using SA.Infrastructure.Data;
@@ -13,6 +14,8 @@ using SA.WebApp.Components.Services;
 using SA.WebApp.Hubs;
 using SA.WebApp.Services;
 using SA.WebApp.State;
+// using SA.Domain.Entities.SA;
+// using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +35,13 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var sagaConnectionString = builder.Configuration.GetConnectionString("SAGA") ?? throw new InvalidOperationException("Connection string 'SagaConnection' not found.");
+
+//builder.Services.AddDbContext<SagaContext>(options =>
+//    options.UseSqlServer(sagaConnectionString));
+//Solve error: A second operation started on this context before a previous operation completed"
+builder.Services.AddDbContextFactory<SagaContext>(options =>
+    options.UseSqlServer(sagaConnectionString));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString), ServiceLifetime.Transient);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -40,7 +50,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        options.Lockout.AllowedForNewUsers = true; //Importante: Para que el bloqueo funcione, la cuenta debe tener habilitado el Lockout.
     })
+    .AddRoles<IdentityRole>() // <-- Para restringir a roles específicos, si lo necesitas
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -49,13 +61,15 @@ builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddTransient<IEmailSender<ApplicationUser>, SA.Infrastructure.Services.EmailSender>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 // REGISTRO DEL STATE CONTAINER
 // Usamos Scoped para que los datos vivan lo que dura la sesión del usuario en esa pestaña
 builder.Services.AddScoped<ProductStateContainer>();
 builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
+builder.Services.AddScoped<SA.WebApp.Services.LoadingService>();
 
 // REGISTRO DEL SERVICIO DE TOAST
 builder.Services.AddScoped<ToastService>();
@@ -89,5 +103,47 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 app.MapHub<ProductHub>("/productHub"); // Mapeamos la ruta del Hub
+
+// ==========================================
+// SEED DE ROLES Y SUPER USUARIO
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // 1. Crear roles por defecto si no existen
+    string[] roleNames = { "Administrador", "Gerente", "Usuario" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    // 2. Crear el usuario Administrador por defecto
+    //var adminEmail = "admin@saga.com";
+    var adminEmail = "daniel78963@gmail.com";    
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        var newAdmin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true // Evita que pida confirmación por correo
+        };
+
+        var createPowerUser = await userManager.CreateAsync(newAdmin, "Admin123*");
+        if (createPowerUser.Succeeded)
+        {
+            // Asignar el rol al usuario recién creado
+            await userManager.AddToRoleAsync(newAdmin, "Administrador");
+        }
+    }
+}
 
 app.Run();

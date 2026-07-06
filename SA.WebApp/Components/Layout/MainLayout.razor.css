@@ -26,16 +26,25 @@ main {
     /*background-color: #f0f1f7;*/
 }
 
-.top-row {
+/*.top-row {*/
     /*background-color: #f7f7f7;*/
     /*background-color: #5856d6;*/
-    background-color: #f7f7f7;
+    /*background-color: #f7f7f7;*/
     /*border top row que lo separa del body-container*/
     /*border-bottom: 1px solid #d6d5d5;*/
-    justify-content: flex-end;
+    /*justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
+}*/
+.top-row {
+    background-color: #f7f7f7;
+    /* Cambiamos height por min-height para que crezca hacia abajo al abrir el acordeón */
+    min-height: 3.5rem;
+    height: auto;
+    display: flex;
+    align-items: center;
+    z-index: 1030;
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
@@ -128,3 +137,125 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+
+
+
+/* =========================================
+   MENÚ HORIZONTAL SUPERIOR
+   ========================================= */
+.top-horizontal-menu .nav-link {
+    color: #4a4a4a;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease-in-out;
+}
+
+    .top-horizontal-menu .nav-link:hover {
+        color: #5856d6; /* Tu color morado corporativo */
+    }
+
+/* =========================================
+   AVATAR DEL USUARIO
+   ========================================= */
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #5856d6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(88, 86, 214, 0.3);
+}
+
+/* =========================================
+   DESPLEGABLE DE SESIÓN (DROPDOWN DE BOOTSTRAP)
+   ========================================= */
+.user-dropdown-menu {
+    min-width: 250px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 0; /* Quitamos el padding para que la línea divisoria toque los bordes */
+    overflow: hidden; /* Mantiene los bordes redondeados */
+    /* Agrega esta línea para forzar que baje */
+    margin-top: 55px !important;
+}
+
+/* Animación nativa para cuando Bootstrap añade la clase 'show' */
+.dropdown-menu.show {
+    animation: dropIn 0.2s ease-out forwards;
+}
+
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-dropdown-menu .dropdown-item {
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    transition: all 0.2s;
+}
+
+    .user-dropdown-menu .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #5856d6; /* Tu color morado */
+        padding-left: 1.8rem !important; /* Desplazamiento sutil */
+    }
+
+    /* Resalte rojo para el botón de Cerrar Sesión */
+    .user-dropdown-menu .dropdown-item.text-danger:hover {
+        background-color: #ffeef0;
+        color: #dc3545 !important;
+    }
+
+/* Evitar que el dropdown del usuario tenga animación flotante y sombras excesivas en móviles, 
+   para que se comporte 100% como un acordeón nativo */
+@media (max-width: 767.98px) {
+    .user-dropdown-menu {
+        border: none !important;
+        box-shadow: none !important;
+        /*  background-color: transparent !important;*/
+        background-color: #fff !important;
+        margin-top: 0 !important;
+        animation: none !important;
+    }
+}
+
+/* =========================================
+   ESTILOS DEL LOADING OVERLAY GLOBAL
+   ========================================= */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.55); /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(4px); /* Difumina ligeramente lo que está detrás */
+    z-index: 9999; /* Asegura que tape menús, modales y cualquier cosa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-container {
+    text-align: center;
+}
+
+/* Sombra para el texto blanco sobre el fondo desenfocado */
+.text-shadow {
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+}

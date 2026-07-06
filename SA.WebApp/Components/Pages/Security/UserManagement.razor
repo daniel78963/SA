@@ -1,0 +1,318 @@
+﻿@page "/security/users"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SA.Domain.Identity
+@using Microsoft.EntityFrameworkCore
+@inject SA.WebApp.Services.SweetAlertService Swal
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@* Solo los administradores pueden entrar a esta página *@
+@attribute [Authorize(Roles = "Administrador")]
+@inject SA.WebApp.Services.LoadingService LoadingService
+@inject SA.WebApp.Services.SweetAlertService Swal
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4><i class="bi bi-shield-lock-fill me-2"></i>Gestión de Usuarios y Roles</h4>
+
+        @* <a class="btn btn-primary" href="security/users/create">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+        </a> *@ 
+        <a class="btn btn-primary rounded-pill px-3" href="security/users/create">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Email / Usuario</th>
+                        <th>Roles Asignados</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in userList)
+                    {
+                        <tr>
+                            <td>@item.User.Email</td>
+                            <td>
+                                @if (item.Roles.Any())
+                                {
+                                    @foreach (var role in item.Roles)
+                                    {
+                                        <span class="badge bg-info text-dark me-1">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Sin roles</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsLockedOut)
+                                {
+                                    <span class="badge bg-danger">Bloqueado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @* Botón de Roles *@
+                                <button class="btn btn-sm btn-outline-primary me-2" title="Gestionar Roles" @onclick="() => OpenRoleModal(item.User)">
+                                    <i class="bi bi-person-badge"></i> Roles
+                                </button>
+
+                                @if (item.User.Email != "daniel78963@gmail.com")
+                                {
+                                    @* Botón de Bloqueo *@
+                                    @if (item.IsLockedOut)
+                                    {
+                                        <button class="btn btn-sm btn-outline-success" title="Desbloquear" @onclick="() => ToggleLockout(item.User)">
+                                            <i class="bi bi-unlock-fill"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger" title="Bloquear" @onclick="() => ToggleLockout(item.User)">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    @* Mostramos un texto o icono indicando que esta cuenta es intocable *@
+                                    <span class="badge bg-secondary mt-1" title="Cuenta de sistema protegida">
+                                        <i class="bi bi-shield-check"></i> Protegido
+                                    </span>
+                                }
+
+                                @if (item.User.Email != "daniel78963@gmail.com")
+                                {
+                                    <button class="btn btn-sm btn-outline-danger ms-2" title="Eliminar Usuario"
+                                            @onclick="() => DeleteUser(item.User)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@* ==========================================
+   MODAL DE GESTIÓN DE ROLES
+   ========================================== *@
+@if (showRoleModal)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Roles para @selectedUser?.Email</h5>
+                    <button type="button" class="btn-close" @onclick="CloseRoleModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Selecciona los roles que deseas asignar a este usuario:</p>
+                    <div class="list-group">
+                        @foreach (var role in allRoles)
+                        {
+                            <label class="list-group-item d-flex gap-2">
+                                <input class="form-check-input flex-shrink-0"
+                                       type="checkbox"
+                                       checked="@selectedUserRoles.Contains(role)"
+                                       @onchange="(e) => OnRoleCheckboxChanged(role, e.Value)" />
+                                <span>@role</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseRoleModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveRoles">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // Clase auxiliar para la tabla
+    private class UserViewModel
+    {
+        public ApplicationUser User { get; set; } = null!;
+        public IList<string> Roles { get; set; } = new List<string>();
+        public bool IsLockedOut { get; set; }
+    }
+
+    private List<UserViewModel> userList = new();
+
+    // Variables para el Modal
+    private bool showRoleModal = false;
+    private ApplicationUser? selectedUser;
+    private List<string> allRoles = new();
+    private List<string> selectedUserRoles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersData();
+        // Cargamos todos los roles del sistema (ej. "Administrador", "Gerente", "Vendedor")
+        allRoles = await RoleManager.Roles.Select(r => r.Name!).ToListAsync();
+    }
+
+    private async Task LoadUsersData()
+    {
+        userList.Clear();
+        var users = await UserManager.Users.ToListAsync();
+
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            userList.Add(new UserViewModel
+            {
+                User = user,
+                Roles = roles,
+                IsLockedOut = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now
+            });
+        }
+    }
+
+    // --- Lógica de Bloqueo ---
+    private async Task ToggleLockout(ApplicationUser user)
+    {
+        // 🛡️ DOBLE PROTECCIÓN: Evitar bloqueo desde el código C#
+        if (user.Email == "daniel78963@gmail.com")
+        {
+            // Aquí podrías usar tu SweetAlertService o ToastService para mostrar un error,
+            // pero con el 'return' basta para abortar la acción silenciosamente.
+            return;
+        }
+
+        LoadingService.Show();
+        await Task.Delay(5000);
+        try
+        {
+            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now;
+            if (isLocked)
+            {
+                await UserManager.SetLockoutEndDateAsync(user, null); // Desbloquear
+            }
+            else
+            {
+                await UserManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue); // Bloquear permanente
+            }
+            await LoadUsersData();
+        }
+        catch (Exception ex)
+        {
+            await Swal.ShowErrorAsync("Error", "Ocurrió una falla en el servidor.");
+        }
+        finally
+        {
+            // 3. Desbloqueamos el sistema
+            LoadingService.Hide();
+        }
+    }
+
+    // --- Lógica del Modal de Roles ---
+    private async Task OpenRoleModal(ApplicationUser user)
+    {
+        selectedUser = user;
+        var roles = await UserManager.GetRolesAsync(user);
+        selectedUserRoles = roles.ToList();
+        showRoleModal = true;
+    }
+
+    private void CloseRoleModal()
+    {
+        showRoleModal = false;
+        selectedUser = null;
+    }
+
+    private void OnRoleCheckboxChanged(string role, object? isChecked)
+    {
+        if (isChecked is bool check && check)
+        {
+            if (!selectedUserRoles.Contains(role)) selectedUserRoles.Add(role);
+        }
+        else
+        {
+            selectedUserRoles.Remove(role);
+        }
+    }
+
+    private async Task SaveRoles()
+    {
+        if (selectedUser != null)
+        {
+            // Obtenemos los roles que tiene actualmente en BD
+            var currentRoles = await UserManager.GetRolesAsync(selectedUser);
+
+            // Calculamos cuáles agregar y cuáles quitar
+            var rolesToAdd = selectedUserRoles.Except(currentRoles).ToList();
+            var rolesToRemove = currentRoles.Except(selectedUserRoles).ToList();
+
+            if (rolesToAdd.Any()) await UserManager.AddToRolesAsync(selectedUser, rolesToAdd);
+            if (rolesToRemove.Any()) await UserManager.RemoveFromRolesAsync(selectedUser, rolesToRemove);
+        }
+
+        CloseRoleModal();
+        await LoadUsersData(); // Recargar la tabla para ver los cambios
+    }
+
+    private async Task DeleteUser(ApplicationUser user)
+    {
+        // 🛡️ DOBLE PROTECCIÓN: No eliminar al SuperAdmin
+        if (user.Email == "daniel78963@gmail.com") return;
+
+        // 1. Lanzar la alerta de confirmación con SweetAlert
+        bool confirmado = await Swal.ConfirmDeleteAsync(
+            title: "¿Eliminar usuario?",
+            text: $"¿Estás seguro de que deseas eliminar permanentemente a {user.Email}?",
+            confirmButtonText: "Sí, eliminar"
+        );
+
+        // 2. Si el usuario cancela en el popup, detenemos el proceso
+        if (!confirmado) return;
+                
+        try
+        {
+            // 3. Si aceptó, procedemos con la eliminación
+            LoadingService.Show();
+
+            var result = await UserManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                await LoadUsersData(); // Recarga la tabla
+                LoadingService.Hide();
+
+                // 4. Mostrar el Toast de éxito en la esquina superior
+                await Swal.ShowToastSuccessAsync("Usuario eliminado correctamente.");
+            }
+            else
+            {
+                // 5. Mostrar popup de error si algo falla en Identity
+                var errores = string.Join(" | ", result.Errors.Select(e => e.Description));
+                await Swal.ShowErrorAsync("No se pudo eliminar", errores);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Swal.ShowErrorAsync("Error", "Ocurrió una falla en el servidor.");
+        }
+        finally
+        {
+            // 3. Desbloqueamos el sistema
+            LoadingService.Hide();
+        }
+    }
+}

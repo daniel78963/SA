@@ -1,3 +1,7 @@
+:root {
+    --main-color: #5046e5;
+    --gray-color: #101010;
+}
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -13,7 +17,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -58,3 +62,97 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* =========================================
+   Fonts
+   ========================================= */
+
+.text-title {
+    /*text-shadow: 1px 1px 4px rgba(0,0,0,0.8);*/
+    /* letter-spacing: 0.5px;*/
+    /*color: #0A0A0A;*/
+    color: #1F1E1E;
+    font-weight: 600;
+}
+
+.text-phrase {
+    /*text-shadow: 1px 1px 4px rgba(0,0,0,0.8);*/
+    /*letter-spacing: 0.5px;*/
+    /*color: #3D3C3C;*/
+    color: #4F4D4D;
+}
+
+.text-title-sui {
+    color: #1F1E1E;
+    font-weight: 600;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.text-phrase-sui {
+    color: #4F4D4D;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.text-title-ss {
+    color: #1F1E1E;
+    font-weight: 600;
+    font-family: "Sans Serif Collection";
+}
+
+.text-phrase-ss {
+    color: #4F4D4D;
+    font-family: "Sans Serif Collection";
+}
+
+.text-title-suil {
+    color: #1F1E1E;
+    font-weight: 500;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.text-phrase-suil {
+    color: #4F4D4D;
+    font-family: "Segoe UI", Tahoma;
+}
+
+.text-title-suil-danger0 {
+    color: #ff0033;
+    font-weight: 500;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.text-phrase-suil-danger0 {
+    color: #fa0c3c;
+    font-family: "Segoe UI", Tahoma;
+}
+
+.text-title-suil-danger {
+    color: #ed113d;
+    font-weight: 500;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.text-phrase-suil-danger {
+    color: #e81c45;
+    font-family: "Segoe UI", Tahoma;
+}
+
+/* =========================================
+   Defaults
+   ========================================= */
+
+h1 {
+    font-family: Tahoma, "Segoe UI", Arial;
+    color: var(--main-color);
+}
+
+h2, h3, h4 {
+    font-family: Tahoma, "Segoe UI", Arial;
+    color: var(--main-color);
+}
+
+p {
+    font-family: "Segoe UI", Tahoma, Arial;
+    color: #4F4D4D;
+}
+

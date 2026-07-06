@@ -1,0 +1,349 @@
+﻿@page "/security/users/create"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SA.Domain.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Transactions
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager NavigationManager
+@* @inject SA.Domain.Entities.SA.SagaContext SagaContext *@
+@inject IDbContextFactory<SA.Domain.Entities.SA.SagaContext> DbFactory
+@inject SA.WebApp.Services.LoadingService LoadingService
+
+@* Protegemos la ruta para que solo entre el Administrador *@
+@attribute [Authorize(Roles = "Administrador")]
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="d-flex align-items-center mb-4">
+                <a href="security/users" class="btn btn-outline-secondary me-3" title="Volver">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h3 class="text-primary mb-0"><i class="bi bi-person-plus-fill me-2"></i>Crear Nuevo Usuario</h3>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <EditForm Model="newUser" OnValidSubmit="CreateUserAsync">
+                        <DataAnnotationsValidator />
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger p-3 mb-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> @errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Correo Electrónico <span class="text-danger">*</span></label>
+                            <InputText class="form-control form-control-lg" @bind-Value="newUser.Email" placeholder="usuario@saga.com" autocomplete="off" />
+                            <ValidationMessage For="@(() => newUser.Email)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Contraseña Temporal <span class="text-danger">*</span></label>
+                            <InputText type="password" class="form-control form-control-lg" @bind-Value="newUser.Password" placeholder="********" autocomplete="new-password" />
+                            <ValidationMessage For="@(() => newUser.Password)" class="text-danger small mt-1" />
+                            <div class="form-text mt-2">
+                                La contraseña debe tener al menos 6 caracteres, incluir una mayúscula, un número y un carácter especial.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Asignar Rol Inicial</label>
+                            <InputSelect class="form-select form-select-lg" @bind-Value="newUser.SelectedRole">
+                                <option value="">-- Sin Rol Específico --</option>
+                                @foreach (var role in allRoles)
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </InputSelect>
+                            <div class="form-text mt-1">Podrás gestionar roles adicionales más adelante.</div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="security/users" class="btn btn-light btn-md border">Cancelar</a>
+                            <button type="submit" class="btn btn-primary btn-md px-4">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private class CreateUserModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El correo es obligatorio.")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Debes ingresar un correo válido.")]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria.")]
+        public string Password { get; set; } = string.Empty;
+
+        public string SelectedRole { get; set; } = string.Empty;
+
+        public string Identificacion { get; set; } = string.Empty;
+        public DateTime FechaIngreso { get; set; } = DateTime.Now;
+        public bool ChangePassword { get; set; } = false;
+    }
+
+    private CreateUserModel newUser = new();
+    private List<string> allRoles = new();
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Cargar los roles disponibles para el select
+        allRoles = await RoleManager.Roles.Select(r => r.Name!).ToListAsync();
+    }
+
+    private async Task CreateUserAsync()
+    {
+        LoadingService.Show();
+        errorMessage = null;
+
+        var user = new ApplicationUser
+        {
+            UserName = newUser.Email,
+            Email = newUser.Email,
+            EmailConfirmed = true // Se marca verificado porque lo crea el admin
+        };
+
+        try
+        {
+
+            var result = await UserManager.CreateAsync(user, newUser.Password);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                {
+                    await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                }
+
+                // Éxito: Redirigimos de vuelta a la lista de usuarios
+                NavigationManager.NavigateTo("/security/users");
+            }
+            else
+            {
+                // Error: Mostrar los mensajes de validación de Identity (ej. "Password too short")
+                errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Ocurrió un error inesperado. Revisa tu conexión.";
+            Console.WriteLine($"Error: {ex.Message}"); 
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
+    }
+
+    private async Task CreateUserSAGAAsync()
+    {
+        errorMessage = null;
+
+        try
+        {
+            // IMPORTANTE: Como usamos async/await, es OBLIGATORIO usar TransactionScopeAsyncFlowOption.Enabled
+            using (var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+
+                newUser.Identificacion = "123456789012345";
+                newUser.FechaIngreso = DateTime.Now;
+                newUser.ChangePassword = true;
+
+                // ==========================================
+                // 1. PASO ERP (SagaContext)
+                // ==========================================
+                var nuevaPersona = new Domain.Entities.SA.Persona
+                {
+                    Identificacion = newUser.Identificacion,
+                    Usuario = newUser.Email,
+                    FechaIngreso = newUser.FechaIngreso,
+                    CambiarContrasena = newUser.ChangePassword
+                    //...
+                };
+
+                using var SagaContext = DbFactory.CreateDbContext();
+                SagaContext.Personas.Add(nuevaPersona);
+                await SagaContext.SaveChangesAsync(); // Se ejecuta de forma temporal en la transacción
+
+                // if (newUser.SelectedRole == "Docente")
+                // {
+                //     var nuevoDocente = new Domain.Entities.SA.Docente { PersonaId = nuevaPersona.PersonaId };
+                //     SagaContext.Docentes.Add(nuevoDocente);
+                //     await SagaContext.SaveChangesAsync();
+                // }
+
+                // ==========================================
+                // 2. PASO SEGURIDAD (UserManager / ApplicationDbContext)
+                // ==========================================
+                var user = new ApplicationUser
+                {
+                    UserName = newUser.Email,
+                    Email = newUser.Email,
+                    EmailConfirmed = true,
+                    PersonaId = nuevaPersona.PersonaId // Enlace suave
+                };
+
+                var result = await UserManager.CreateAsync(user, newUser.Password);
+
+                if (result.Succeeded)
+                {
+                    if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                    {
+                        await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                    }
+
+                    // ==========================================
+                    // 3. CONFIRMACIÓN (COMMIT)
+                    // ==========================================
+                    // Si llegamos a esta línea, significa que Persona, Docente y ApplicationUser
+                    // no tuvieron errores. Confirmamos la transacción completa.
+                    transactionScope.Complete();
+
+                    // Redirigimos al terminar
+                    NavigationManager.NavigateTo("/security/users");
+                }
+                else
+                {
+                    // Si Identity falla (ej. contraseña débil o correo repetido),
+                    // nunca se llama a transactionScope.Complete().
+                    // Al terminar el bloque using, .NET le dirá a la BD que deshaga lo de SagaContext.
+                    errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+                }
+            } // <-- Aquí se hace el Rollback automático si no hubo Complete()
+        }
+        catch (Exception ex)
+        {
+            // Si hay una desconexión, falla la BD o se rompe una llave foránea en SagaContext
+            errorMessage = "Ocurrió un error inesperado. Ningún cambio fue guardado en el sistema.";
+            Console.WriteLine($"Error crítico en transacción: {ex.Message}");
+        }
+    }
+
+    private async Task CreateUserTransactionsAsync()
+    {
+        errorMessage = null;
+        LoadingService.Show();
+        Domain.Entities.SA.Persona? personaCreada = null;
+        Domain.Entities.SA.Docente? docenteCreado = null;
+        using var SagaContext = DbFactory.CreateDbContext();
+
+        try
+        {
+            newUser.Identificacion = "123456789012345";
+            newUser.FechaIngreso = DateTime.Now;
+            newUser.ChangePassword = true;
+
+            // ==========================================
+            // 1. PASO ERP (SagaContext)
+            // ==========================================
+            personaCreada = new Domain.Entities.SA.Persona
+            {
+                Identificacion = newUser.Identificacion,
+                Usuario = newUser.Email,
+                FechaIngreso = newUser.FechaIngreso,
+                CambiarContrasena = newUser.ChangePassword
+                //...
+            };
+
+            SagaContext.Personas.Add(personaCreada);
+            await SagaContext.SaveChangesAsync(); // Se guarda y obtiene su ID
+
+            // if (newUser.SelectedRole == "Docente")
+            // {
+            //     docenteCreado = new Domain.Entities.SA.Docente { Id = personaCreada.Id, Estado = true };
+            //     SagaContext.Docentes.Add(docenteCreado);
+            //     await SagaContext.SaveChangesAsync();
+            // }
+
+            // ==========================================
+            // 2. PASO SEGURIDAD (UserManager)
+            // ==========================================
+            var user = new ApplicationUser
+            {
+                UserName = newUser.Email,
+                Email = newUser.Email,
+                EmailConfirmed = true,
+                PersonaId = personaCreada.PersonaId // Enlace suave
+            };
+
+            var result = await UserManager.CreateAsync(user, newUser.Password);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(newUser.SelectedRole))
+                {
+                    await UserManager.AddToRoleAsync(user, newUser.SelectedRole);
+                }
+
+                // ÉXITO TOTAL: Redirigimos
+                NavigationManager.NavigateTo("/security/users");
+            }
+            else
+            {
+                // ERROR EN IDENTITY (ej. contraseña débil): Iniciamos ROLLBACK MANUAL
+                errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+                await RollbackErpAsync(personaCreada, docenteCreado);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Ocurrió un error inesperado. Revisa tu conexión.";
+            Console.WriteLine($"Error: {ex.Message}");
+
+            // Si falló en la mitad del proceso, intentamos limpiar la basura
+            await RollbackErpAsync(personaCreada, docenteCreado);
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
+    }
+
+    // Método de limpieza (Compensación)
+    private async Task RollbackErpAsync(Domain.Entities.SA.Persona? persona, Domain.Entities.SA.Docente? docente)
+    {
+        //patrón llamado "Transacciones de Compensación" (si el paso B falla, ejecuto un código para deshacer manualmente el paso A).
+        // Patrón SAGA: Es el flujo de orquestación o coreografía que agrupa estas transacciones locales. SAGA dicta en qué orden
+        // deben ejecutarse y coordina el disparo de las compensaciones si alguna falla
+        try
+        {
+            using var SagaContext = DbFactory.CreateDbContext();
+            if (docente != null)
+            {
+                SagaContext.Docentes.Remove(docente);
+            }
+            if (persona != null)
+            {
+                SagaContext.Personas.Remove(persona);
+            }
+
+            if (persona != null || docente != null)
+            {
+                await SagaContext.SaveChangesAsync();
+            }
+        }
+        catch (Exception rollbackEx)
+        {
+            // Solo logueamos si el rollback falla (ej. si la BD se cayó por completo)
+            Console.WriteLine($"Error crítico en Rollback: {rollbackEx.Message}");
+        }
+    }
+}

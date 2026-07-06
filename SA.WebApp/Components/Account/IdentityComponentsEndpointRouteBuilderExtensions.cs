@@ -47,7 +47,14 @@ namespace Microsoft.AspNetCore.Routing
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
-                return TypedResults.LocalRedirect($"~/{returnUrl}");
+                //return TypedResults.LocalRedirect($"~/{returnUrl}");
+                if (string.IsNullOrWhiteSpace(returnUrl))
+                {
+                    return TypedResults.LocalRedirect("~/");
+                }
+
+                // Si returnUrl viene con una barra inicial "/", la quitamos para evitar el error "~//"
+                return TypedResults.LocalRedirect($"~/{returnUrl.TrimStart('/')}");
             });
 
             accountGroup.MapPost("/PasskeyCreationOptions", async (

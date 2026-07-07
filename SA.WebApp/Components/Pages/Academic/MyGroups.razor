@@ -8,8 +8,9 @@
 @inject LoadingService LoadingService
 @* @inject SA.Domain.Entities.SA.SagaContext SagaContext *@
 @inject IDbContextFactory<SA.Domain.Entities.SA.SagaContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
 
-<!-- Filtros de Búsqueda -->
+@* <!-- Filtros de Búsqueda -->
 <div class="card shadow-sm border-1 mb-4">
     <div class="card-body bg-light rounded">
         <div class="row g-3 align-items-end">
@@ -125,13 +126,156 @@
             <p class="text-muted">No tienes asignaturas matriculadas para el periodo y programa seleccionado.</p>
         </div>
     }
-}
+} *@
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="text-primary mb-0 fw-bold">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Mis Grupos de Clase
+        </h3>
+    </div>
+
+    <!-- Filtros de Búsqueda -->
+    <div class="card shadow-sm mb-4 border-0 rounded-3">
+        <div class="card-body bg-light rounded-3">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-secondary small text-uppercase">Programa Académico</label>
+                    <select class="form-select form-select-lg shadow-none" @bind="filtroProgramaId">
+                        <option value="">-- Seleccione un programa --</option>
+                        @foreach (var prog in listaProgramas)
+                        {
+                            <option value="@prog.Id">@prog.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-secondary small text-uppercase">Período Académico</label>
+                    <select class="form-select form-select-lg shadow-none" @bind="filtroPeriodoId" disabled="@string.IsNullOrEmpty(filtroProgramaId)">
+                        <option value="">-- Seleccione un período --</option>
+                        @foreach (var per in listaPeriodos)
+                        {
+                            <option value="@per.Id">@per.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary btn-lg w-100 shadow-sm" @onclick="ConsultarGrupos" disabled="@(string.IsNullOrEmpty(filtroPeriodoId) || buscando)">
+                        @if (buscando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Buscando...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-search me-2"></i><span>Consultar Horario</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    @if (haConsultado)
+    {
+        if (gruposEstudiante.Any())
+        {
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                              @*   <th class="py-3 ps-4 border-0">Asignatura y Grupo</th> *@
+                                <th class="text-center py-3 ps-4 pe-4">Asignatura y Grupo</th>
+                                <th class="text-center py-3 pe-4">Docente</th>
+                                <th class="text-center py-3 pe-4 pe-4">Horarios y Aulas</th>
+                                <th class="text-center py-3 pe-4 pe-4">Acciones</th> 
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var grupo in gruposEstudiante)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">@grupo.MateriaNombre</div>
+                                        @* <span class="badge bg-secondary opacity-75">Grupo: @grupo.CodigoGrupo</span> *@
+                                        <span class="badge bg-secondary opacity-75">Grupo: @grupo.CodigoGrupo</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle-small bg-primary text-white me-3" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold;">
+                                                @GetInitials(grupo.ProfesorNombre)
+                                            </div>
+                                            <span>@(string.IsNullOrEmpty(grupo.ProfesorNombre) ? "Sin asignar" : grupo.ProfesorNombre)</span>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4">
+                                        <!-- Renderizado moderno de Horarios -->
+                                        <div class="d-flex flex-wrap gap-2 py-2">
+                                            @if (grupo.Horarios.Any())
+                                            {
+                                                foreach (var h in grupo.Horarios)
+                                                {
+                                                    <div class="bg-light border rounded-pill px-3 py-1 text-secondary" style="font-size: 0.85rem;">
+                                                        <i class="bi bi-clock me-1 text-primary"></i>
+                                                        <span class="fw-bold text-dark">@h.Dia</span> @h.HoraInicio - @h.HoraFin
+                                                        <span class="mx-1">|</span>
+                                                       @*  <i class="bi bi-geo-alt-fill text-danger me-1"></i> @h.Aula *@
+                                                        <i class="bi bi-geo-alt me-1"></i> @h.Aula
+                                                        @if (!string.IsNullOrEmpty(h.Ciclo))
+                                                        {
+                                                            <span class="badge bg-primary text-light ms-1">Ciclo @h.Ciclo</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic small">Horario por definir</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" title="Ver Plan de Aula">
+                                                <i class="bi bi-journal-text"></i> <span class="d-none d-xl-inline ms-1">Plan</span>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success" title="Ver Plan de Evaluación">
+                                                <i class="bi bi-check2-square"></i> <span class="d-none d-xl-inline ms-1">Eval.</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Estado Vacío Mejorado -->
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-secondary">No se encontraron grupos</h4>
+                <p class="text-muted">No tienes asignaturas matriculadas para el programa y período seleccionados.</p>
+            </div>
+        }
+    }
+</div>
 
 
 @code {
     // ==========================================
     // VIEW MODELS (DTOs para la vista)
     // ==========================================
+    public class FiltroOpcionVM
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
+    }
+
     private class GrupoEstudianteVM
     {
         public string MateriaNombre { get; set; } = string.Empty;
@@ -170,24 +314,34 @@
     // ==========================================
     // ESTADO DE LA VISTA
     // ==========================================
-    private string filtroProgramaId = string.Empty;
-    private string filtroPeriodoId = string.Empty;
+    // private string filtroProgramaId = string.Empty;
+    // private string filtroPeriodoId = string.Empty;
+    // private bool haConsultado = false;
+
+    // private List<GrupoEstudianteVM> gruposEncontrados = new();
+
+    // // Mocks para filtros (Reemplazar con consultas a SagaContext)
+    // private List<(string Id, string Nombre)> programasMock = new()
+    // {
+    //     ("1", "ESPECIALIZACIÓN EN ALTA GERENCIA ESTRATÉGICA"),
+    //     ("2", "INGENIERÍA DE SISTEMAS")
+    // };
+
+    // private List<(string Id, string Nombre)> periodosMock = new()
+    // {
+    //     ("201601", "2016 - 01"),
+    //     ("202601", "2026 - 01")
+    // };
+    private string filtroProgramaId = "";
+    private string filtroPeriodoId = "";
+    private bool buscando = false;
     private bool haConsultado = false;
+    private string currentUserEmail = "";
 
-    private List<GrupoEstudianteVM> gruposEncontrados = new();
-
-    // Mocks para filtros (Reemplazar con consultas a SagaContext)
-    private List<(string Id, string Nombre)> programasMock = new()
-    {
-        ("1", "ESPECIALIZACIÓN EN ALTA GERENCIA ESTRATÉGICA"),
-        ("2", "INGENIERÍA DE SISTEMAS")
-    };
-
-    private List<(string Id, string Nombre)> periodosMock = new()
-    {
-        ("201601", "2016 - 01"),
-        ("202601", "2026 - 01")
-    };
+    // Listas de datos
+    private List<FiltroOpcionVM> listaProgramas = new();
+    private List<FiltroOpcionVM> listaPeriodos = new();
+    private List<GrupoEstudianteVM> gruposEstudiante = new();
 
     protected override void OnInitialized()
     {
@@ -201,7 +355,7 @@
         // var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         // var user = authState.User;
         // string personaId = user.Claims.FirstOrDefault(c => c.Type == "PersonaId")?.Value;
-        //
+
         // programasMock = await SagaContext.Inscripciones
         //      .Where(i => i.PersonaId == personaId && i.Estado == "Activo")
         //      .Select(i => new { Id = i.ProgramaId.ToString(), Nombre = i.Programa.Nombre })
@@ -211,96 +365,228 @@
         // De igual forma cargar los periodos activos.
     }
 
-    private async Task ConsultarGruposAsync()
+    protected override async Task OnInitializedAsync()
     {
-        LoadingService.Show();
+        // 1. CAPTURAR EL USUARIO AUTENTICADO
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            currentUserEmail = user.Identity.Name ?? "";
+
+            // TODO ERP: Aquí puedes buscar en tu base de datos de Seguridad el PersonaId vinculado a este email.
+            // var appUser = await UserManager.FindByEmailAsync(currentUserEmail);
+            // var personaId = appUser.PersonaId;
+        }
+
+        // 2. CARGAR FILTROS (MOCK)
+        /*
+        // TODO ERP: Reemplazar con consulta real al SagaContext filtrando por el PersonaId del estudiante
+        listaProgramas = await SagaContext.Programas
+            .Where(p => SagaContext.Inscripciones.Any(i => i.ProgramaId == p.Id && i.PersonaId == personaId))
+            .Select(p => new FiltroOpcionVM { Id = p.Id.ToString(), Nombre = p.Nombre })
+            .ToListAsync();
+        */
+
+        // Datos simulados para pruebas visuales
+        listaProgramas = new List<FiltroOpcionVM>
+        {
+            new FiltroOpcionVM { Id = "1", Nombre = "Ingeniería de Sistemas" },
+            new FiltroOpcionVM { Id = "2", Nombre = "Administración de Empresas" }
+        };
+
+        listaPeriodos = new List<FiltroOpcionVM>
+        {
+            new FiltroOpcionVM { Id = "20241", Nombre = "2024 - Semestre 1" },
+            new FiltroOpcionVM { Id = "20242", Nombre = "2024 - Semestre 2" }
+        };
+    }
+
+    // private async Task ConsultarGrupos()
+    // {
+    //     if (string.IsNullOrEmpty(filtroProgramaId) || string.IsNullOrEmpty(filtroPeriodoId)) return;
+
+    //     buscando = true;
+    //     haConsultado = false;
+    //     LoadingService.Show(); // Activa el overlay oscuro en toda la pantalla
+
+    //     try
+    //     {
+    //         // Simulamos tiempo de red/base de datos
+    //         await Task.Delay(800);
+
+    //         // TODO ERP: Aquí va la consulta real (LINQ con Includes)
+    //         /*
+    //         gruposEstudiante = await SagaContext.InscritosxGruposxAsignaturas
+    //             .Include(iga => iga.Grupo)
+    //                 .ThenInclude(g => g.Asignatura)
+    //             .Include(iga => iga.Grupo)
+    //                 .ThenInclude(g => g.Docente)
+    //                     .ThenInclude(d => d.Persona) // Para el nombre
+    //             .Include(iga => iga.Grupo)
+    //                 .ThenInclude(g => g.Horarios) // Relación 1:N
+    //                     .ThenInclude(h => h.RecursoFisico) // Para el aula
+    //             .Where(iga => iga.Inscripcion.PersonaId == personaId &&
+    //                           iga.Grupo.PeriodoId == filtroPeriodoId &&
+    //                           iga.Inscripcion.ProgramaId == filtroProgramaId)
+    //             .Select(iga => new GrupoEstudianteVM
+    //             {
+    //                 MateriaNombre = iga.Grupo.Asignatura.Nombre,
+    //                 CodigoGrupo = iga.Grupo.Codigo,
+    //                 ProfesorNombre = iga.Grupo.Docente.Persona.Nombres + " " + iga.Grupo.Docente.Persona.Apellidos,
+    //                 Horarios = iga.Grupo.Horarios.Select(h => new HorarioVM
+    //                 {
+    //                     DiaSemana = h.Dia.Nombre, // Ej: Lunes
+    //                     HoraInicio = h.HoraInicio.ToString(@"hh\:mm"),
+    //                     HoraFin = h.HoraFin.ToString(@"hh\:mm"),
+    //                     Aula = h.RecursoFisico.Nombre,
+    //                     Ciclo = h.Ciclo ?? ""
+    //                 }).ToList()
+    //             })
+    //             .ToListAsync();
+    //         */
+
+    //         // Cargamos datos simulados si eligió "Ingeniería" y "2024-1"
+    //         if (filtroProgramaId == "1" && filtroPeriodoId == "20241")
+    //         {
+    //             gruposEstudiante = new List<GrupoEstudianteVM>
+    //             {
+    //                 new GrupoEstudianteVM
+    //                 {
+    //                     MateriaNombre = "Bases de Datos Avanzadas",
+    //                     CodigoGrupo = "IS-501A",
+    //                     ProfesorNombre = "Lina Marcela Acevedo",
+    //                     Horarios = new List<HorarioVM>
+    //                     {
+    //                         new HorarioVM { DiaSemana = "Martes", HoraInicio = "18:00", HoraFin = "20:00", Aula = "Laboratorio 3", Ciclo = "1" },
+    //                         new HorarioVM { DiaSemana = "Jueves", HoraInicio = "18:00", HoraFin = "20:00", Aula = "Laboratorio 3", Ciclo = "1" }
+    //                     }
+    //                 },
+    //                 new GrupoEstudianteVM
+    //                 {
+    //                     MateriaNombre = "Arquitectura de Software",
+    //                     CodigoGrupo = "IS-505B",
+    //                     ProfesorNombre = "Carlos Mario Perez",
+    //                     Horarios = new List<HorarioVM>
+    //                     {
+    //                         new HorarioVM { DiaSemana = "Sábado", HoraInicio = "08:00", HoraFin = "12:00", Aula = "Aula Virtual A", Ciclo = "" }
+    //                     }
+    //                 },
+    //                 new GrupoEstudianteVM
+    //                 {
+    //                     MateriaNombre = "Ética Profesional",
+    //                     CodigoGrupo = "ET-100",
+    //                     ProfesorNombre = "", // Prueba de docente sin asignar
+    //                     Horarios = new List<HorarioVM>() // Prueba de horario sin asignar
+    //                 }
+    //             };
+    //         }
+    //         else
+    //         {
+    //             gruposEstudiante.Clear();
+    //         }
+
+    //         haConsultado = true;
+    //     }
+    //     finally
+    //     {
+    //         buscando = false;
+    //         LoadingService.Hide(); // Desactiva el overlay
+    //     }
+    // }
+
+    
+    private async Task ConsultarGrupos()
+    {
+        if (string.IsNullOrEmpty(filtroProgramaId) || string.IsNullOrEmpty(filtroPeriodoId)) return;
+
+        buscando = true;
         haConsultado = false;
+        LoadingService.Show(); // Activa el overlay oscuro en toda la pantalla
 
         try
         {
-            // Simulamos delay de la BD
-            await Task.Delay(600);
+            // Simulamos tiempo de red/base de datos
+            await Task.Delay(800);
 
-            // ====================================================================
-            // TODO ERP: Reemplazar esto con la consulta real a Entity Framework
-            // ====================================================================
-            //
-            // Aquí debes hacer un Join/Include complejo. Dependiendo de tu modelo
-            // de datos, podría ser algo como:
-            //
-            // gruposEncontrados = await SagaContext.GruposEstudiantes
-            //      .Include(ge => ge.Grupo).ThenInclude(g => g.Asignatura)
-            //      .Include(ge => ge.Grupo).ThenInclude(g => g.Docente).ThenInclude(d => d.Persona)
-            //      .Include(ge => ge.Grupo).ThenInclude(g => g.Horarios).ThenInclude(h => h.Aula)
-            //      .Where(ge => ge.PersonaId == personaIdLogueada
-            //                && ge.ProgramaId == filtroProgramaId
-            //                && ge.PeriodoId == filtroPeriodoId)
-            //      .Select(ge => new GrupoEstudianteVM
-            //      {
-            //           CodigoGrupo = ge.Grupo.Codigo,
-            //           MateriaNombre = ge.Grupo.Asignatura.Nombre,
-            //           ProfesorNombre = ge.Grupo.Docente.Persona.Nombres + " " + ge.Grupo.Docente.Persona.Apellidos,
-            //           Horarios = ge.Grupo.Horarios.Select(h => new HorarioVM
-            //           {
-            //                Dia = h.DiaSemana,
-            //                HoraInicio = h.HoraInicio.ToString("HH:mm"),
-            //                HoraFin = h.HoraFin.ToString("HH:mm"),
-            //                Aula = h.Aula.Nombre,
-            //                Ciclo = h.Ciclo // Si el ciclo viene en el horario o grupo
-            //           }).ToList()
-            //      }).ToListAsync();
+            // TODO ERP: Aquí va la consulta real (LINQ con Includes)
+            /*
+            gruposEstudiante = await SagaContext.InscritosxGruposxAsignaturas
+                .Include(iga => iga.Grupo)
+                    .ThenInclude(g => g.Asignatura)
+                .Include(iga => iga.Grupo)
+                    .ThenInclude(g => g.Docente)
+                        .ThenInclude(d => d.Persona) // Para el nombre
+                .Include(iga => iga.Grupo)
+                    .ThenInclude(g => g.Horarios) // Relación 1:N
+                        .ThenInclude(h => h.RecursoFisico) // Para el aula
+                .Where(iga => iga.Inscripcion.PersonaId == personaId &&
+                              iga.Grupo.PeriodoId == filtroPeriodoId &&
+                              iga.Inscripcion.ProgramaId == filtroProgramaId)
+                .Select(iga => new GrupoEstudianteVM
+                {
+                    MateriaNombre = iga.Grupo.Asignatura.Nombre,
+                    CodigoGrupo = iga.Grupo.Codigo,
+                    ProfesorNombre = iga.Grupo.Docente.Persona.Nombres + " " + iga.Grupo.Docente.Persona.Apellidos,
+                    Horarios = iga.Grupo.Horarios.Select(h => new HorarioVM
+                    {
+                        DiaSemana = h.Dia.Nombre, // Ej: Lunes
+                        HoraInicio = h.HoraInicio.ToString(@"hh\:mm"),
+                        HoraFin = h.HoraFin.ToString(@"hh\:mm"),
+                        Aula = h.RecursoFisico.Nombre,
+                        Ciclo = h.Ciclo ?? ""
+                    }).ToList()
+                })
+                .ToListAsync();
+            */
 
-        
-            // Si el programa es el "1" devolvemos los Mocks de tu imagen
-            if (filtroProgramaId == "1")
+            // Cargamos datos simulados si eligió "Ingeniería" y "2024-1"
+            if (filtroProgramaId == "1" && filtroPeriodoId == "20241")
             {
-                gruposEncontrados = new List<GrupoEstudianteVM>
-            {
-                new GrupoEstudianteVM
+                gruposEstudiante = new List<GrupoEstudianteVM>
                 {
-                    CodigoGrupo = "C2",
-                    MateriaNombre = "GERENCIA DE PROYECTOS",
-                    ProfesorNombre = "CARLOS MARIO GALLO RAMÍREZ",
-                    Horarios = new List<HorarioVM>
+                    new GrupoEstudianteVM
                     {
-                        new HorarioVM { Dia = "VIERNES", HoraInicio = "18:00", HoraFin = "22:00", Aula = "VIRTUAL 6", Ciclo = "O.ESP" },
-                        new HorarioVM { Dia = "SÁBADO", HoraInicio = "08:00", HoraFin = "12:00", Aula = "AULAV PROYECTO 4", Ciclo = "O.ESP" }
-                    }
-                },
-                new GrupoEstudianteVM
-                {
-                    CodigoGrupo = "C2",
-                    MateriaNombre = "GERENCIA ESTRATÉGICA DE LA PRODUCTIVIDAD",
-                    ProfesorNombre = "JUAN DE DIOS URIBE ZIRENE",
-                    Horarios = new List<HorarioVM>
+                        MateriaNombre = "Bases de Datos Avanzadas",
+                        CodigoGrupo = "IS-501A",
+                        ProfesorNombre = "Lina Marcela Acevedo",
+                        Horarios = new List<HorarioVM>
+                        {
+                            new HorarioVM { Dia  = "Martes", HoraInicio = "18:00", HoraFin = "20:00", Aula = "Laboratorio 3", Ciclo = "1" },
+                            new HorarioVM { Dia  = "Jueves", HoraInicio = "18:00", HoraFin = "20:00", Aula = "Laboratorio 3", Ciclo = "1" }
+                        }
+                    },
+                    new GrupoEstudianteVM
                     {
-                        new HorarioVM { Dia = "VIERNES", HoraInicio = "18:00", HoraFin = "22:00", Aula = "VIRTUAL 7", Ciclo = "O.ESP" },
-                        new HorarioVM { Dia = "SÁBADO", HoraInicio = "08:00", HoraFin = "12:00", Aula = "AULAV PROYECTO 5", Ciclo = "O.ESP" }
-                    }
-                },
-                new GrupoEstudianteVM
-                {
-                    CodigoGrupo = "C2",
-                    MateriaNombre = "SEMINARIO DE INVESTIGACIÓN II",
-                    ProfesorNombre = "LINA MARCELA ACEVEDO CORREA",
-                    Horarios = new List<HorarioVM>
+                        MateriaNombre = "Arquitectura de Software",
+                        CodigoGrupo = "IS-505B",
+                        ProfesorNombre = "Carlos Mario Perez",
+                        Horarios = new List<HorarioVM>
+                        {
+                            new HorarioVM { Dia  = "Sábado", HoraInicio = "08:00", HoraFin = "12:00", Aula = "Aula Virtual A", Ciclo = "" }
+                        }
+                    },
+                    new GrupoEstudianteVM
                     {
-                        new HorarioVM { Dia = "VIERNES", HoraInicio = "18:00", HoraFin = "22:00", Aula = "VIRTUAL 7", Ciclo = "O.ESP" },
-                        new HorarioVM { Dia = "SÁBADO", HoraInicio = "08:00", HoraFin = "12:00", Aula = "VIRTUAL 6", Ciclo = "O.ESP" }
+                        MateriaNombre = "Ética Profesional",
+                        CodigoGrupo = "ET-100",
+                        ProfesorNombre = "", // Prueba de docente sin asignar
+                        Horarios = new List<HorarioVM>() // Prueba de horario sin asignar
                     }
-                }
-            };
+                };
             }
             else
             {
-                gruposEncontrados = new List<GrupoEstudianteVM>(); // Empty state
+                gruposEstudiante.Clear();
             }
 
             haConsultado = true;
         }
         finally
         {
-            LoadingService.Hide();
+            buscando = false;
+            LoadingService.Hide(); // Desactiva el overlay
         }
     }
 }

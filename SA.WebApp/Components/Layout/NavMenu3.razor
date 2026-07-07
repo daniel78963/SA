@@ -126,6 +126,32 @@
     @* ÍTEM PADRE (Desplegable) *@
     @* Ejemplo de link desplegable *@
     <div class="nav-item px-3">
+        <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleSystemAcademic">
+            <i class="bi bi-box"></i>
+            @* Fíjate en la clase menu-text aquí *@
+            <span class="flex-grow-1 menu-text">Académico</span>
+            <i class="bi bi-chevron-down chevron-icon" style="transition: transform 0.3s ease; transform: @(expandAcademic ? "rotate(180deg)" : "rotate(0deg)")"></i>
+        </button>
+    </div>
+
+    @* SUBNIVEL (Se muestra solo si expandAcademic es true) *@
+    @if (expandAcademic)
+    {
+        <div class="nav-item px-3 submenu">
+            <nav class="flex-column ps-4">
+                @* ps-4 da la indentación (sangría) visual *@
+                <div class="nav-item mb-0">
+                    <NavLink class="nav-link submenu-link" href="academic/mygroups" Match="NavLinkMatch.All">
+                        <i class="bi bi-list-ul"></i> Mis Grupos
+                    </NavLink>
+                </div> 
+            </nav>
+        </div>
+    }
+
+    @* ÍTEM PADRE (Desplegable) *@
+    @* Ejemplo de link desplegable *@
+    <div class="nav-item px-3">
         <button class="nav-link w-100 text-start d-flex align-items-center" @onclick="ToggleSystemMenu">
             <i class="bi bi-box"></i>
             @* Fíjate en la clase menu-text aquí *@
@@ -134,7 +160,7 @@
         </button>
     </div>
 
-    @* SUBNIVEL (Se muestra solo si expandProducts es true) *@
+    @* SUBNIVEL (Se muestra solo si expandSistema es true) *@
     @if (expandSistema)
     {
         <div class="nav-item px-3 submenu">
@@ -305,6 +331,7 @@
 
     // VARIABLE PARA EL SUBMENÚ
     private bool expandProducts = false;
+    private bool expandAcademic = false;    
     private bool expandSistema = false;
 
     // private void ToggleNavMenu()
@@ -328,6 +355,7 @@
         {
             // Comportamiento normal si ya estaba expandido
             expandProducts = !expandProducts;
+            expandAcademic = false;
             expandSistema = false; // Cerrar el otro submenú si se abre este
         }
     }
@@ -345,6 +373,22 @@
         {
             expandSistema = !expandSistema;
             expandProducts = false; // Cerrar el otro submenú si se abre este
+            expandAcademic = false;
+        }
+    }
+
+    private async Task ToggleSystemAcademic()
+    { 
+        if (IsMini)
+        {
+            await IsMiniChanged.InvokeAsync(false);
+            expandAcademic  = true;
+        }
+        else
+        {
+            expandAcademic = !expandAcademic;
+            expandProducts = false; // Cerrar el otro submenú si se abre este
+            expandSistema = false;
         }
     }
 }

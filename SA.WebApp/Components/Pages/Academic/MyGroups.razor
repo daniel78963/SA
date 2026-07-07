@@ -1,11 +1,13 @@
 ﻿@page "/academic/mygroups"
 @using Microsoft.AspNetCore.Authorization
 @using SA.WebApp.Services
+@using Microsoft.EntityFrameworkCore
 @* TODO: Descomentar y ajustar el rol cuando tengas tus roles definidos @
 @ @attribute [Authorize(Roles = "Estudiante")] *@
 
 @inject LoadingService LoadingService
 @* @inject SA.Domain.Entities.SA.SagaContext SagaContext *@
+@inject IDbContextFactory<SA.Domain.Entities.SA.SagaContext> DbFactory
 
 <!-- Filtros de Búsqueda -->
 <div class="card shadow-sm border-1 mb-4">

@@ -208,7 +208,7 @@
                                 </td>
                                 <td class="pe-4">
                                     <!-- Renderizado moderno de Horarios -->
-                                    <div class="d-flex flex-wrap gap-2 py-2">
+                                    <div class="d-flex flex-wrap gap-2 py-0">
                                         @if (grupo.Horarios.Any())
                                         {
                                             foreach (var h in grupo.Horarios)
@@ -412,7 +412,12 @@
         //     new FiltroOpcionVM { Id = "20242", Nombre = "2024 - Semestre 2" }
         // };
 
+        // Get periods only where the student has enrollments (Matriculas)
         listaPeriodos = await SagaContext.Periodos
+            .Where(p => SagaContext.Matriculas
+                .Any(m => m.PeriodoId == p.PeriodoId &&
+                         m.Inscripcion != null &&
+                         m.Inscripcion.PersonaId == personaId))
             .Select(p => new FiltroOpcionVM { Id = p.PeriodoId.ToString(), Nombre = p.Campo })
             .ToListAsync();
     }

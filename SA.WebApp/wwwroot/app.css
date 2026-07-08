@@ -7,7 +7,7 @@
 /*html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }*/
-html, body, input, select, textarea, button, table, .form-select, .form-control, .form-label {
+html, body, input, select, textarea, button, table, .form-select, .form-control, .form-label, LoadingSelect {
     font-family: "Segoe UI", Tahoma, Arial, sans-serif !important;
 }
 

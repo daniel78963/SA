@@ -141,7 +141,7 @@
 <div class="card shadow-sm border-1 mb-4">
     <div class="card-body bg-light rounded">
         <div class="row g-3 align-items-end">
-            <div class="col-md-5">
+            @* <div class="col-md-5">
                 <label class="form-label fw-bold text-secondary small">Programa Académico</label>
                 <select class="form-select" @onchange="OnProgramaChangeAsync" >
                     <option value="">-- Seleccione su programa --</option>
@@ -150,11 +150,11 @@
                         <option value="@prog.Id">@prog.Nombre</option>
                     }
                 </select>
-            </div>
-            <div class="col-md-4">
+            </div> *@
+           @*  <div class="col-md-4">
                 <label class="form-label fw-bold text-secondary small">Programa Académico</label>
                 <LoadingSelect @bind-Value="filtroProgramaId"
-                               IsLoading="IsLoadingPrograms"
+                               IsLoading="IsLoadingPrograms" 
                                DefaultText="-- Seleccione una opción --">
 
                     @foreach (var item in listaProgramas)
@@ -172,6 +172,30 @@
                         <option value="@per.Id">@per.Nombre</option>
                     }
                 </select>
+            </div>  *@
+            <div class="col-md-5">
+                <label class="form-label fw-bold text-secondary small">Programa Académico</label>
+                <LoadingSelect CssClass="form-select-md" Value="@filtroProgramaId"
+                                                           ValueChanged="OnProgramaChanged"
+                                                           IsLoading="IsLoadingPrograms"
+                                                           DefaultText="-- Seleccione un programa --">
+                    @foreach (var prog in listaProgramas)
+                    {
+                        <option value="@prog.Id">@prog.Nombre</option>
+                    }
+                </LoadingSelect>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small text-uppercase">Período Académico</label>
+                <SA.WebApp.Components.Shared.LoadingSelect CssClass="form-select-md" @bind-Value="filtroPeriodoId"
+                                                           IsLoading="IsLoadingPeriods"
+                                                           IsDisabled="@string.IsNullOrEmpty(filtroProgramaId)"
+                                                           DefaultText="-- Seleccione un período --">
+                    @foreach (var per in listaPeriodos)
+                    {
+                        <option value="@per.Id">@per.Nombre</option>
+                    }
+                </SA.WebApp.Components.Shared.LoadingSelect>
             </div> 
             <div class="col-md-3">
                 <button class="btn btn-primary w-100" @onclick="ConsultarGrupos"
@@ -344,6 +368,7 @@
     private bool buscando = false;
     private bool haConsultado = false;
     private bool IsLoadingPrograms = false;
+    private bool IsLoadingPeriods = false;
     private string currentUserEmail = "";
     private int personaId = 0;
 
@@ -461,6 +486,41 @@
                          m.Inscripcion.ProgramaId == programaId))
             .Select(p => new FiltroOpcionVM { Id = p.PeriodoId.ToString(), Nombre = p.Campo })
             .ToListAsync();
+    }
+
+    // Método que se dispara al cambiar el Programa para cargar los periodos en cascada
+    private async Task OnProgramaChanged(string nuevoProgramaId)
+    {
+        filtroProgramaId = nuevoProgramaId;
+        filtroPeriodoId = ""; // Limpiamos el periodo anterior
+        listaPeriodos.Clear(); // Vaciamos la lista
+        gruposEstudiante.Clear();
+        haConsultado = false;
+
+        if (!string.IsNullOrEmpty(filtroProgramaId))
+        {
+            IsLoadingPeriods = true;
+
+            // // Simulamos el tiempo de consulta al ERP para traer los periodos de este programa
+            // await Task.Delay(800);
+
+            // // TODO ERP: Consulta real a SagaContext.Periodos filtrando por el programa elegido
+            // listaPeriodos = new List<FiltroOpcionVM>
+            // {
+            //     new FiltroOpcionVM { Id = "20241", Nombre = "2024 - Semestre 1" },
+            //     new FiltroOpcionVM { Id = "20242", Nombre = "2024 - Semestre 2" }
+            // };
+            listaPeriodos = await SagaContext.Periodos
+            .Where(p => SagaContext.Matriculas
+                .Any(m => m.PeriodoId == p.PeriodoId &&
+                       m.Inscripcion != null &&
+                       m.Inscripcion.PersonaId == personaId &&
+                       m.Inscripcion.ProgramaId == int.Parse( filtroProgramaId)))
+                .Select(p => new FiltroOpcionVM { Id = p.PeriodoId.ToString(), Nombre = p.Campo })
+                .ToListAsync();
+
+            IsLoadingPeriods = false;
+        }
     }
 
     // private async Task ConsultarGrupos()

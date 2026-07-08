@@ -143,13 +143,25 @@
         <div class="row g-3 align-items-end">
             <div class="col-md-5">
                 <label class="form-label fw-bold text-secondary small">Programa Académico</label>
-                <select class="form-select" @bind="filtroProgramaId">
+                <select class="form-select" @onchange="OnProgramaChangeAsync" >
                     <option value="">-- Seleccione su programa --</option>
                     @foreach (var prog in listaProgramas)
                     {
                         <option value="@prog.Id">@prog.Nombre</option>
                     }
                 </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small">Programa Académico</label>
+                <LoadingSelect @bind-Value="filtroProgramaId"
+                               IsLoading="IsLoadingPrograms"
+                               DefaultText="-- Seleccione una opción --">
+
+                    @foreach (var item in listaProgramas)
+                    {
+                        <option value="@item.Id">@item.Nombre</option>
+                    }
+                </LoadingSelect>
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-bold text-secondary small">Periodo Académico</label>
@@ -160,7 +172,7 @@
                         <option value="@per.Id">@per.Nombre</option>
                     }
                 </select>
-            </div>
+            </div> 
             <div class="col-md-3">
                 <button class="btn btn-primary w-100" @onclick="ConsultarGrupos"
                         disabled="@(string.IsNullOrEmpty(filtroProgramaId) || string.IsNullOrEmpty(filtroPeriodoId))">
@@ -331,6 +343,7 @@
     private string filtroPeriodoId = "";
     private bool buscando = false;
     private bool haConsultado = false;
+    private bool IsLoadingPrograms = false;
     private string currentUserEmail = "";
     private int personaId = 0;
 
@@ -363,10 +376,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoadingPrograms = true;
+
         // 1. CAPTURAR EL USUARIO AUTENTICADO
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-          personaId = 0;
+        personaId = 0;
 
         if (user.Identity is not null && user.Identity.IsAuthenticated)
         {
@@ -391,13 +406,14 @@
         }
 
         // 2. CARGAR FILTROS (MOCK)
-        
+
+
         // TODO ERP: Reemplazar con consulta real al SagaContext filtrando por el PersonaId del estudiante
         listaProgramas = await SagaContext.Programas
             .Where(p => SagaContext.Inscripciones.Any(i => i.ProgramaId == p.ProgramaId && i.PersonaId == personaId))
             .Select(p => new FiltroOpcionVM { Id = p.ProgramaId.ToString(), Nombre = p.NombrePrograma })
             .ToListAsync();
-       
+        IsLoadingPrograms = false;
 
         // // Datos simulados para pruebas visuales
         // listaProgramas = new List<FiltroOpcionVM>
@@ -412,12 +428,37 @@
         //     new FiltroOpcionVM { Id = "20242", Nombre = "2024 - Semestre 2" }
         // };
 
-        // Get periods only where the student has enrollments (Matriculas)
+        // // Get periods only where the student has enrollments (Matriculas)
+        // listaPeriodos = await SagaContext.Periodos
+        //     .Where(p => SagaContext.Matriculas
+        //         .Any(m => m.PeriodoId == p.PeriodoId &&
+        //                  m.Inscripcion != null &&
+        //                  m.Inscripcion.PersonaId == personaId))
+        //     .Select(p => new FiltroOpcionVM { Id = p.PeriodoId.ToString(), Nombre = p.Campo })
+        //     .ToListAsync();
+    }
+
+    // Update periods when programa selection changes
+    private async Task OnProgramaChangeAsync(ChangeEventArgs e)
+    {
+        filtroProgramaId = e.Value?.ToString() ?? "";
+        filtroPeriodoId = ""; // Reset periodo selection
+
+        if (string.IsNullOrEmpty(filtroProgramaId))
+        {
+            listaPeriodos.Clear();
+            return;
+        }
+
+        int programaId = int.Parse(filtroProgramaId);
+
+        // Get periods for the selected programa where the student has enrollments
         listaPeriodos = await SagaContext.Periodos
             .Where(p => SagaContext.Matriculas
                 .Any(m => m.PeriodoId == p.PeriodoId &&
                          m.Inscripcion != null &&
-                         m.Inscripcion.PersonaId == personaId))
+                         m.Inscripcion.PersonaId == personaId &&
+                         m.Inscripcion.ProgramaId == programaId))
             .Select(p => new FiltroOpcionVM { Id = p.PeriodoId.ToString(), Nombre = p.Campo })
             .ToListAsync();
     }

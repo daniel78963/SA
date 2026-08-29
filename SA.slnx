@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/scr/">
+    <Project Path="SA.APILibrary/SA.APILibrary.csproj" Id="e31cb502-e797-498e-a098-82e2dcb366b3" />
     <Project Path="SA.Application/SA.Application.csproj" />
     <Project Path="SA.Domain/SA.Domain.csproj" />
     <Project Path="SA.Infrastructure/SA.Infrastructure.csproj" />

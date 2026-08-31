@@ -1,0 +1,39 @@
+﻿<div class="position-relative">
+    <select class="form-select @CssClass" value="@Value" @onchange="OnValueChanged" disabled="@(IsLoading || IsDisabled)">
+        @if (!string.IsNullOrEmpty(DefaultText))
+        {
+            <option value="">@DefaultText</option>
+        }
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+    </select>
+
+    @* El spinner se posiciona absolutamente a la derecha, justo antes de la flecha del select *@
+    @if (IsLoading)
+    {
+        <div class="position-absolute top-50 end-0 translate-middle-y" style="margin-right: 2.5rem; pointer-events: none;">
+            <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+
+    [Parameter] public string DefaultText { get; set; } = "-- Seleccione --";
+    [Parameter] public string CssClass { get; set; } = "form-select-lg shadow-none";
+
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

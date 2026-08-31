@@ -1,9 +1,14 @@
 :root {
     --main-color: #5046e5;
     --gray-color: #101010;
+    --bs-body-font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    --bs-font-sans-serif: "Segoe UI", Tahoma, Arial, sans-serif;
 }
-html, body {
+/*html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}*/
+html, body, input, select, textarea, button, table, .form-select, .form-control, .form-label, LoadingSelect {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif !important;
 }
 
 a, .btn-link {

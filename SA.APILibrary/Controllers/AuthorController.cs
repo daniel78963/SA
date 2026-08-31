@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SA.APILibrary.Entities;
 
 namespace SA.APILibrary.Controllers
 {
     [ApiController]
-    [Route("")]
+    [Route("api/authors")]
     public class AuthorController : ControllerBase
     {
         [HttpGet]
-        public string Get()
+        public IEnumerable<Author> Get()
         {
-             return "authors";
+            return new List<Author> 
+            {
+                new Author { Id = 1, Name = "Author 1" },
+                new Author { Id = 2, Name = "Author 2" }
+            };
         }
 
         [HttpGet("api/authors")]

@@ -14,5 +14,8 @@ namespace SA.APILibrary.Data
         }
 
         public DbSet<Author> Authors { get; set; }
+        public DbSet<Book> Books  { get; set; }
+        //Add-Migration TableBooks
+        //Update-Database
     }
 }

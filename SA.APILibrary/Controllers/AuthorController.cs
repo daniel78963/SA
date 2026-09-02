@@ -64,6 +64,46 @@ namespace SA.APILibrary.Controllers
             return Ok();
         }
 
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int id, [FromBody] Author author)
+        {
+            if (id != author.Id)
+            {
+                return BadRequest("Differents Ids");
+            }
+            //context.Update(author);
+            //await context.SaveChangesAsync();
+            //return Ok(author);
+
+            // Logic to update an existing author
+            var existingAuthor = await context.Authors.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingAuthor is null)
+            {
+                return NotFound();
+            }
+
+            existingAuthor.Name = author.Name;
+            // Update other properties as needed
+
+            //context.Update(existingAuthor);
+            await context.SaveChangesAsync();
+            return Ok(existingAuthor);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            // Logic to delete an author
+            var existingAuthor = await context.Authors.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingAuthor is null)
+            {
+                return NotFound();
+            }
+            context.Remove(existingAuthor);
+            await context.SaveChangesAsync();
+            return Ok();
+        }
+
     }
     //{
     //    public IActionResult Index()

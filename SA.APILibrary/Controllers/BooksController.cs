@@ -36,6 +36,13 @@ namespace SA.APILibrary.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Book book)
         {
+            var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
+            
+            if (!existingAuthor)
+            {
+                return BadRequest("Invalid AuthorId");
+            }
+
             _context.Add(book);
             await _context.SaveChangesAsync();
             return Ok();
@@ -47,6 +54,13 @@ namespace SA.APILibrary.Controllers
             if (id != book.Id)
             {
                 return BadRequest("Differents Ids");
+            }
+
+            var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
+
+            if (!existingAuthor)
+            {
+                return BadRequest("Invalid AuthorId");
             }
 
             var existingBook = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);

@@ -30,7 +30,9 @@ namespace SA.APILibrary.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Author>> Get(int Id)
         {
-            var author = await context.Authors.FirstOrDefaultAsync(x => x.Id == Id);
+            var author = await context.Authors
+                .Include(x => x.Books)
+                .FirstOrDefaultAsync(x => x.Id == Id);
             if (author is null)
             {
                 return NotFound();

@@ -19,7 +19,9 @@ namespace SA.APILibrary.Controllers
         [HttpGet]
         public async Task<IEnumerable<Book>> Get()
         {
-            return await _context.Books.ToListAsync(); 
+            return await _context.Books
+                .Include(x => x.Author)
+                .ToListAsync(); 
         }
 
         [HttpGet("{id:int}")]
@@ -76,7 +78,14 @@ namespace SA.APILibrary.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
+            //var booksDeleted = await _context.Books.Where(x => x.Id == id).ExecuteDeleteAsync();
+            //if (booksDeleted == 0)
+            //{
+            //    return NotFound();
+            //}
+
             var book = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+          
             if (book is null)
             {
                 return NotFound();

@@ -6,22 +6,23 @@ using SA.APILibrary.Entities;
 namespace SA.APILibrary.Controllers
 {
     [ApiController]
-    [Route("api/books")]
+    [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public BooksController(ApplicationDbContext context            )
+        public BooksController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
+        [HttpGet("/authors")] //esto reempleazaria api/authors, pero no es recomendable, ya que se deberia de crear un nuevo controlador para authors y quedaria /api/authors
         public async Task<IEnumerable<Book>> Get()
         {
             return await _context.Books
                 .Include(x => x.Author)
-                .ToListAsync(); 
+                .ToListAsync();
         }
 
         [HttpGet("{id:int}")]
@@ -37,11 +38,19 @@ namespace SA.APILibrary.Controllers
             return Ok(book);
         }
 
+        [HttpGet("{param1}/{param2?}")]
+        //public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
+        public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")
+        {
+            // Implementation for handling {param1}/{param2} route
+            return Ok(new { Param1 = param1, Param2 = param2 });
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] Book book)
         {
             var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
-            
+
             if (!existingAuthor)
             {
                 return BadRequest("Invalid AuthorId");
@@ -87,7 +96,7 @@ namespace SA.APILibrary.Controllers
             //}
 
             var book = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
-          
+
             if (book is null)
             {
                 return NotFound();

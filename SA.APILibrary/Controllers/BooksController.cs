@@ -38,6 +38,14 @@ namespace SA.APILibrary.Controllers
             return Ok(book);
         }
 
+        //[HttpGet("{title:alpha}")] //esto es para que solo acepte letras, si se pone un numero no lo aceptara 
+        //public async Task<IEnumerable<Book>> Get(string title)
+        //{
+        //    return await _context.Books
+        //        .Include(x => x.Author)
+        //        .Where(x => x.Title.Contains(title)).ToListAsync(); 
+        //}
+
         [HttpGet("{param1}/{param2?}")]
         //public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
         public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")

@@ -25,8 +25,9 @@ namespace SA.APILibrary.Controllers
                 .ToListAsync();
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}")] //api/autors/id?includeBooks=true
         public async Task<ActionResult<Book>> Get(int id)
+        //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
             var book = await _context.Books
                 .Include(x => x.Author)

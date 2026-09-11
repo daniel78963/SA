@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SA.APILibrary.Validations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SA.APILibrary.Entities
 {
@@ -6,6 +7,8 @@ namespace SA.APILibrary.Entities
     {
         public int Id { get; set; }
         [Required]
+        [StringLength(150, ErrorMessage = "The field {0} must be at most {1} characters long")]
+        [FirstLetterMayus]
         public required string Name { get; set; }
         public List<Book> Books { get; set; } = new List<Book>();
 

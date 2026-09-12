@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SA.APILibrary.Repositories;
 using System.Security.Cryptography.Xml;
 using System.Text.Json.Serialization;
 
@@ -6,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Area de servicios
 //builder.Services.AddControllers();
+
+builder.Services.AddTransient<RepositoryValues>(); 
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; //esto es temporal para ignorar el error de referencia cíclica que se produce al serializar los objetos Author y Book, ya que ambos tienen una relación de uno a muchos. Esto es un problema común en las aplicaciones que utilizan Entity Framework Core y se puede solucionar de varias maneras, como por ejemplo utilizando DTOs (Data Transfer Objects) o configurando la serialización para ignorar las referencias cíclicas. Se deben usar DTOs

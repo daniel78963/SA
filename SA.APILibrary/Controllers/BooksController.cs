@@ -61,8 +61,10 @@ namespace SA.APILibrary.Controllers
             var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
 
             if (!existingAuthor)
-            {
-                return BadRequest("Invalid AuthorId");
+            {               
+                //return BadRequest("Invalid AuthorId");
+                ModelState.AddModelError(nameof(Book.AuthorId), "Invalid AuthorId");
+                return ValidationProblem(ModelState);
             }
 
             _context.Add(book);

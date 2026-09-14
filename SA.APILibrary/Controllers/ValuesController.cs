@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SA.APILibrary.Entities;
+using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
 
 namespace SA.APILibrary.Controllers
@@ -8,9 +9,9 @@ namespace SA.APILibrary.Controllers
     [Route("api/[controller]")]
     public class ValuesController : ControllerBase
     {
-        private readonly RepositoryValues repository;
+        private readonly IRepositoryValues repository;
 
-        public ValuesController(RepositoryValues repository)
+        public ValuesController(IRepositoryValues repository)
         {
             this.repository = repository;
         }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
 using System.Security.Cryptography.Xml;
 using System.Text.Json.Serialization;
@@ -8,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 //Area de servicios
 //builder.Services.AddControllers();
 
-builder.Services.AddTransient<RepositoryValues>(); 
+builder.Services.AddTransient<IRepositoryValues, RepositoryValues>();
+//builder.Services.AddTransient<IRepositoryValues, RepositoryValuesOracle>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

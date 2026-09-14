@@ -3,14 +3,15 @@ using SA.APILibrary.Interfaces;
 
 namespace SA.APILibrary.Repositories
 {
-    public class RepositoryValues : IRepositoryValues
+    public class RepositoryValuesOracle : IRepositoryValues
     {
         public IEnumerable<Values> GetValues()
         {
             return new List<Values>
             {
-                new Values { Id = 1, Name = "Value 1" },
-                new Values { Id = 2, Name = "Value 2" }
+                new() { Id = 3, Name = "Value 3 Oracle" },
+                new() { Id = 4, Name = "Value 4 Oracle" },
+                new() { Id = 4, Name = "Value 4 Oracle" }
             };
         }
     }

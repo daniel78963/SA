@@ -13,7 +13,7 @@ builder.Services.AddTransient<TransientService>();
 builder.Services.AddScoped<ScopedService>();
 builder.Services.AddSingleton<SingletonService>();
 
-builder.Services.AddTransient<IRepositoryValues, RepositoryValues>();
+builder.Services.AddSingleton<IRepositoryValues, RepositoryValues>();
 //builder.Services.AddTransient<IRepositoryValues, RepositoryValuesOracle>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>

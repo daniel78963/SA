@@ -21,12 +21,13 @@ namespace SA.APILibrary.Controllers
         [HttpGet]
         public async Task<IEnumerable<Author>> Get()
         {
-            logger.LogTrace("Getting all authors");
-            logger.LogDebug("Getting all authors");
-            logger.LogInformation("Getting all authors");
-            logger.LogWarning("Getting all authors");
-            logger.LogError("Getting all authors");
-            logger.LogCritical("Getting all authors");
+            //logger.LogTrace("Getting all authors");
+            //logger.LogDebug("Getting all authors");
+            //logger.LogInformation("Getting all authors");
+            //logger.LogWarning("Getting all authors");
+            //logger.LogError("Getting all authors");
+            //logger.LogCritical("Getting all authors");
+
             //return new List<Author>
             //{
             //    new Author { Id = 1, Name = "Author 1" },

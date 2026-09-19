@@ -36,7 +36,7 @@ namespace SA.APILibrary.Controllers
             return await context.Authors.ToListAsync();
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetAuthor")]
         public async Task<ActionResult<Author>> Get(int Id)
         {
             var author = await context.Authors
@@ -71,8 +71,10 @@ namespace SA.APILibrary.Controllers
             // Logic to create a new author
             //return CreatedAtAction(nameof(GetAuthorById), new { id = author.Id }, author);
             context.Add(author);
+            //context.Authors.Add(author);
             await context.SaveChangesAsync();
-            return Ok();
+            //return Ok();
+            return new CreatedAtRouteResult("GetAuthor", new { id = author.Id }, author);
         }
 
         [HttpPut("{id:int}")]

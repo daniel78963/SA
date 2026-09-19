@@ -25,7 +25,7 @@ namespace SA.APILibrary.Controllers
                 .ToListAsync();
         }
 
-        [HttpGet("{id:int}")] //api/autors/id?includeBooks=true
+        [HttpGet("{id:int}", Name = "GetBook")] //api/autors/id?includeBooks=true
         public async Task<ActionResult<Book>> Get(int id)
         //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
@@ -69,7 +69,8 @@ namespace SA.APILibrary.Controllers
 
             _context.Add(book);
             await _context.SaveChangesAsync();
-            return Ok();
+            //return Ok();
+            return new CreatedAtRouteResult("GetBook", new { id = book.Id }, book);
         }
 
         [HttpPut("{id:int}")]

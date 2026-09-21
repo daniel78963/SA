@@ -9,7 +9,16 @@ namespace SA.APILibrary.Entities
         [Required]
         [StringLength(150, ErrorMessage = "The field {0} must be at most {1} characters long")]
         [FirstLetterMayus]
-        public required string Name { get; set; }
+        public required string Names { get; set; }
+
+        [Required]
+        [StringLength(150, ErrorMessage = "The field {0} must be at most {1} characters long")]
+        [FirstLetterMayus]
+        public required string Surnames { get; set; }
+
+        [StringLength(20, ErrorMessage = "The field {0} must be at most {1} characters long")]
+        public required string Document { get; set; }
+
         public List<Book> Books { get; set; } = new List<Book>();
 
         //[Range(1, 150, ErrorMessage = "The field {0} must be between {1} and {2}")]
@@ -29,14 +38,14 @@ namespace SA.APILibrary.Entities
         /// <returns></returns>
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (!string.IsNullOrEmpty(Name))
+            if (!string.IsNullOrEmpty(Names))
             {
-                var firstLetter = Name[0].ToString();
+                var firstLetter = Names[0].ToString();
 
                 if (firstLetter != firstLetter.ToUpper())
                 //if (firstLetter != firstLetter.ToUpper() && Age > 40)
                 {
-                    yield return new ValidationResult("The first letter must be uppercase - by model", new[] { nameof(Name) });
+                    yield return new ValidationResult("The first letter must be uppercase - by model", new[] { nameof(Names) });
                 }
             }
         }

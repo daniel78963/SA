@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
+using SA.APILibrary.DTOs;
 using SA.APILibrary.Entities;
 
 namespace SA.APILibrary.Controllers
@@ -19,7 +20,7 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Author>> Get()
+        public async Task<IEnumerable<AuthorDTO>> Get()
         {
             //logger.LogTrace("Getting all authors");
             //logger.LogDebug("Getting all authors");
@@ -33,7 +34,15 @@ namespace SA.APILibrary.Controllers
             //    new Author { Id = 1, Name = "Author 1" },
             //    new Author { Id = 2, Name = "Author 2" }
             //};
-            return await context.Authors.ToListAsync();
+
+            //return await context.Authors.ToListAsync();
+            var authors = await context.Authors.ToListAsync();
+            var authorsDto = authors.Select(a => new AuthorDTO
+            {
+                Id = a.Id,
+                FullName = $"{a.Names} {a.Surnames}"
+            });
+            return authorsDto;
         }
 
         [HttpGet("{id:int}", Name = "GetAuthor")]
@@ -95,7 +104,7 @@ namespace SA.APILibrary.Controllers
                 return NotFound();
             }
 
-            existingAuthor.Name = author.Name;
+            existingAuthor.Names = author.Names;
             // Update other properties as needed
 
             //context.Update(existingAuthor);

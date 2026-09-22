@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Area de servicios
 //builder.Services.AddControllers();
+builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 
 builder.Services.AddTransient<TransientService>();
 builder.Services.AddScoped<ScopedService>();

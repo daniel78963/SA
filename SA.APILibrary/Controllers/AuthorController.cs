@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
 using SA.APILibrary.DTOs;
@@ -12,10 +13,12 @@ namespace SA.APILibrary.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly ILogger<AuthorController> logger;
+        private readonly IMapper mapper;
 
-        public AuthorController(ApplicationDbContext context, ILogger<AuthorController> logger)
+        public AuthorController(ApplicationDbContext context, IMapper mapper, ILogger<AuthorController> logger)
         {
             this.context = context;
+            this.mapper = mapper;
             this.logger = logger;
         }
 
@@ -37,16 +40,17 @@ namespace SA.APILibrary.Controllers
 
             //return await context.Authors.ToListAsync();
             var authors = await context.Authors.ToListAsync();
-            var authorsDto = authors.Select(a => new AuthorDTO
-            {
-                Id = a.Id,
-                FullName = $"{a.Names} {a.Surnames}"
-            });
+            //var authorsDto = authors.Select(a => new AuthorDTO
+            //{
+            //    Id = a.Id,
+            //    FullName = $"{a.Names} {a.Surnames}"
+            //});
+            var authorsDto = mapper.Map<IEnumerable<AuthorDTO>>(authors);
             return authorsDto;
         }
 
         [HttpGet("{id:int}", Name = "GetAuthor")]
-        public async Task<ActionResult<Author>> Get(int Id)
+        public async Task<ActionResult<AuthorDTO>> Get(int Id)
         {
             var author = await context.Authors
                 .Include(x => x.Books)
@@ -55,6 +59,8 @@ namespace SA.APILibrary.Controllers
             {
                 return NotFound();
             }
+
+            var authorDto = mapper.Map<AuthorDTO>(author);
             return Ok(author);
         }
 
@@ -75,29 +81,32 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] Author author)
+        public async Task<ActionResult> Post([FromBody] AuthorCreationDTO authorCreationDto)
         {
             // Logic to create a new author
-            //return CreatedAtAction(nameof(GetAuthorById), new { id = author.Id }, author);
+            var author = mapper.Map<Author>(authorCreationDto);
             context.Add(author);
             //context.Authors.Add(author);
             await context.SaveChangesAsync();
             //return Ok();
-            return new CreatedAtRouteResult("GetAuthor", new { id = author.Id }, author);
+            var authorDto = mapper.Map<AuthorDTO>(author);
+            return new CreatedAtRouteResult("GetAuthor", new { id = author.Id }, authorDto);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromBody] Author author)
+        public async Task<ActionResult> Put(int id, [FromBody] AuthorCreationDTO authorCreationDto)
         {
-            if (id != author.Id)
-            {
-                return BadRequest("Differents Ids");
-            }
+            // Logic to update an existing author
+            //if (id != author.Id)
+            //{
+            //    return BadRequest("Differents Ids");
+            //}
+
             //context.Update(author);
             //await context.SaveChangesAsync();
             //return Ok(author);
-
-            // Logic to update an existing author
+            var author = mapper.Map<Author>(authorCreationDto);
+            author.Id = id; // Set the ID of the author to the provided ID
             var existingAuthor = await context.Authors.FirstOrDefaultAsync(x => x.Id == id);
             if (existingAuthor is null)
             {

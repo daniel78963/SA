@@ -10,8 +10,10 @@ namespace SA.APILibrary.Utilities
         {
             CreateMap<Author, AuthorDTO>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.Names} {src.Surnames}"));
-
             CreateMap<AuthorCreationDTO, Author>();
+
+            CreateMap<Book, BookDTO>();
+            CreateMap<BookCreationDTO, Book>();
         }
     } 
 }

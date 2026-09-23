@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
+using SA.APILibrary.DTOs;
 using SA.APILibrary.Entities;
 
 namespace SA.APILibrary.Controllers
@@ -10,23 +12,27 @@ namespace SA.APILibrary.Controllers
     public class BooksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public BooksController(ApplicationDbContext context)
+        public BooksController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [HttpGet("/authors")] //esto reempleazaria api/authors, pero no es recomendable, ya que se deberia de crear un nuevo controlador para authors y quedaria /api/authors
-        public async Task<IEnumerable<Book>> Get()
+        public async Task<IEnumerable<BookDTO>> Get()
         {
-            return await _context.Books
+            var books = await _context.Books
                 .Include(x => x.Author)
                 .ToListAsync();
+            var booksDto = _mapper.Map<IEnumerable<BookDTO>>(books);
+            return booksDto;
         }
 
         [HttpGet("{id:int}", Name = "GetBook")] //api/autors/id?includeBooks=true
-        public async Task<ActionResult<Book>> Get(int id)
+        public async Task<ActionResult<BookDTO>> Get(int id)
         //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
             var book = await _context.Books
@@ -36,7 +42,8 @@ namespace SA.APILibrary.Controllers
             {
                 return NotFound();
             }
-            return Ok(book);
+            var bookDto = _mapper.Map<BookDTO>(book);
+            return Ok(bookDto);
         }
 
         //[HttpGet("{title:alpha}")] //esto es para que solo acepte letras, si se pone un numero no lo aceptara 
@@ -56,12 +63,13 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] Book book)
+        public async Task<ActionResult> Post([FromBody] BookCreationDTO bookCreationDto)
         {
+            var book = _mapper.Map<Book>(bookCreationDto);
             var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
 
             if (!existingAuthor)
-            {               
+            {
                 //return BadRequest("Invalid AuthorId");
                 ModelState.AddModelError(nameof(Book.AuthorId), "Invalid AuthorId");
                 return ValidationProblem(ModelState);
@@ -70,16 +78,20 @@ namespace SA.APILibrary.Controllers
             _context.Add(book);
             await _context.SaveChangesAsync();
             //return Ok();
-            return new CreatedAtRouteResult("GetBook", new { id = book.Id }, book);
+            var bookDto = _mapper.Map<BookDTO>(book);
+            return new CreatedAtRouteResult("GetBook", new { id = book.Id }, bookDto);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromBody] Book book)
+        public async Task<ActionResult> Put(int id, [FromBody] BookCreationDTO bookCreationDto)
         {
-            if (id != book.Id)
-            {
-                return BadRequest("Differents Ids");
-            }
+            var book = _mapper.Map<Book>(bookCreationDto);
+            book.Id = id; // Set the Id of the book to the provided id
+
+            //if (id != book.Id)
+            //{
+            //    return BadRequest("Differents Ids");
+            //}
 
             var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
 

@@ -9,11 +9,18 @@ namespace SA.APILibrary.Utilities
         public AutoMapperProfiles()
         {
             CreateMap<Author, AuthorDTO>()
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.Names} {src.Surnames}"));
+                .ForMember(dest => dest.FullName, 
+                opt => opt.MapFrom(Author => MapAuthorName(Author)));
+            CreateMap<Author, AuthorWithBooksDTO>()
+               .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => MapAuthorName(src)));
             CreateMap<AuthorCreationDTO, Author>();
 
             CreateMap<Book, BookDTO>();
             CreateMap<BookCreationDTO, Book>();
+            CreateMap<Book, BookWithAuthorDTO>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
         }
-    } 
+
+        private string MapAuthorName(Author author) => $"{author.Names} {author.Surnames}";
+    }
 }

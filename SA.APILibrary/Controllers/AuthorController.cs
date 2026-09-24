@@ -50,7 +50,7 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetAuthor")]
-        public async Task<ActionResult<AuthorDTO>> Get(int Id)
+        public async Task<ActionResult<AuthorWithBooksDTO>> Get(int Id)
         {
             var author = await context.Authors
                 .Include(x => x.Books)
@@ -60,8 +60,8 @@ namespace SA.APILibrary.Controllers
                 return NotFound();
             }
 
-            var authorDto = mapper.Map<AuthorDTO>(author);
-            return Ok(author);
+            var authorDto = mapper.Map<AuthorWithBooksDTO>(author);
+            return Ok(authorDto);
         }
 
         [HttpGet("api/authors")]

@@ -32,7 +32,7 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetBook")] //api/autors/id?includeBooks=true
-        public async Task<ActionResult<BookDTO>> Get(int id)
+        public async Task<ActionResult<BookWithAuthorDTO>> Get(int id)
         //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
             var book = await _context.Books
@@ -42,7 +42,7 @@ namespace SA.APILibrary.Controllers
             {
                 return NotFound();
             }
-            var bookDto = _mapper.Map<BookDTO>(book);
+            var bookDto = _mapper.Map<BookWithAuthorDTO>(book);
             return Ok(bookDto);
         }
 

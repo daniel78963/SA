@@ -119,12 +119,14 @@ namespace SA.APILibrary.Controllers
             //context.Update(existingAuthor);
             await context.SaveChangesAsync();
             return Ok(existingAuthor);
+            //return NoContent(); //204 todo ok pero no devuelve nada (objeto)
         }
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
             // Logic to delete an author
+            //var authors = await context.Authors.Where(x => x.Id == id).ExecuteDeleteAsync();
             var existingAuthor = await context.Authors.FirstOrDefaultAsync(x => x.Id == id);
             if (existingAuthor is null)
             {
@@ -132,7 +134,7 @@ namespace SA.APILibrary.Controllers
             }
             context.Remove(existingAuthor);
             await context.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
 
     }

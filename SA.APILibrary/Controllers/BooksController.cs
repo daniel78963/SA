@@ -107,7 +107,7 @@ namespace SA.APILibrary.Controllers
             }
             _context.Entry(existingBook).CurrentValues.SetValues(book);
             await _context.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
@@ -127,7 +127,7 @@ namespace SA.APILibrary.Controllers
             }
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
     }
 }

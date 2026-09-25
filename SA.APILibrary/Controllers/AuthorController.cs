@@ -124,9 +124,9 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<AuthorPatchDTO> authorPatchDto)
+        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<AuthorPatchDTO> patchDoc)
         {
-            if (authorPatchDto is null)
+            if (patchDoc is null)
             {
                 return BadRequest();
             }
@@ -139,7 +139,7 @@ namespace SA.APILibrary.Controllers
             }
 
             var authorPatchDTO = mapper.Map<AuthorPatchDTO>(existingAuthor);
-            authorPatchDto.ApplyTo(authorPatchDTO, ModelState);
+            patchDoc.ApplyTo(authorPatchDTO, ModelState);
             var isValid = TryValidateModel(authorPatchDTO);
             if (!isValid)
             {

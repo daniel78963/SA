@@ -17,10 +17,13 @@ builder.Services.AddSingleton<SingletonService>();
 builder.Services.AddSingleton<IRepositoryValues, RepositoryValues>();
 //builder.Services.AddTransient<IRepositoryValues, RepositoryValuesOracle>();
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; //esto es temporal para ignorar el error de referencia cíclica que se produce al serializar los objetos Author y Book, ya que ambos tienen una relación de uno a muchos. Esto es un problema común en las aplicaciones que utilizan Entity Framework Core y se puede solucionar de varias maneras, como por ejemplo utilizando DTOs (Data Transfer Objects) o configurando la serialización para ignorar las referencias cíclicas. Se deben usar DTOs
-});
+//builder.Services.AddControllers().AddJsonOptions(options =>
+//{
+//    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; //esto es temporal para ignorar el error de referencia cíclica que se produce al serializar los objetos Author y Book, ya que ambos tienen una relación de uno a muchos. Esto es un problema común en las aplicaciones que utilizan Entity Framework Core y se puede solucionar de varias maneras, como por ejemplo utilizando DTOs (Data Transfer Objects) o configurando la serialización para ignorar las referencias cíclicas. Se deben usar DTOs
+//}); // se comenta pq ya devolvemos DTOs y no las entidades directamente, por lo que no hay problema de referencia cíclica. Se deja comentado para recordar que se puede usar en caso de que se devuelvan entidades directamente.
+
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 builder.Services.AddDbContext<SA.APILibrary.Data.ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

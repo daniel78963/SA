@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SA.APILibrary.DTOs
 {
-    public class AuthorCreationDTO
+    public class AuthorPatchDTO
     {
         [Required]
         [StringLength(150, ErrorMessage = "The field {0} must be at most {1} characters long")]

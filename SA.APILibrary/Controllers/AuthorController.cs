@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
@@ -120,6 +121,35 @@ namespace SA.APILibrary.Controllers
             await context.SaveChangesAsync();
             return Ok(existingAuthor);
             //return NoContent(); //204 todo ok pero no devuelve nada (objeto)
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<AuthorPatchDTO> authorPatchDto)
+        {
+            if (authorPatchDto is null)
+            {
+                return BadRequest();
+            }
+
+            // Logic to partially update an existing author
+            var existingAuthor = await context.Authors.FirstOrDefaultAsync(x => x.Id == id);
+            if (existingAuthor is null)
+            {
+                return NotFound();
+            }
+
+            var authorPatchDTO = mapper.Map<AuthorPatchDTO>(existingAuthor);
+            authorPatchDto.ApplyTo(authorPatchDTO, ModelState);
+            var isValid = TryValidateModel(authorPatchDTO);
+            if (!isValid)
+            {
+                return ValidationProblem();
+            }
+
+            mapper.Map(authorPatchDTO, existingAuthor);
+            await context.SaveChangesAsync();
+            //return Ok(existingAuthor);
+            return NoContent(); //204 todo ok pero no devuelve nada (objeto)
         }
 
         [HttpDelete("{id:int}")]

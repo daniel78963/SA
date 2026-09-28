@@ -20,6 +20,10 @@ namespace SA.APILibrary.Utilities
             CreateMap<BookCreationDTO, Book>();
             CreateMap<Book, BookWithAuthorDTO>()
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
+
+            CreateMap<Comment, CommentDTO>();
+            CreateMap<CommentCreationDTO, Comment>();
+            CreateMap<Comment, CommentPatchDTO>().ReverseMap();
         }
 
         private string MapAuthorName(Author author) => $"{author.Names} {author.Surnames}";

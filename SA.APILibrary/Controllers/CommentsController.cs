@@ -44,7 +44,7 @@ namespace SA.APILibrary.Controllers
             return Ok(mapper.Map<List<CommentDTO>>(comments));
         }
 
-        [HttpGet("{id}", Name = "GetComment")]
+        [HttpGet("{commentId}", Name = "GetComment")]
         public async Task<ActionResult<CommentDTO>> GetComment(Guid commentId)
         {
             var comment = await context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);

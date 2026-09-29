@@ -20,16 +20,16 @@ namespace SA.APILibrary.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet]
-        public IActionResult Index()
-        {
-            return Ok("Comments");
-        }
+        //[HttpGet]
+        //public IActionResult Index()
+        //{
+        //    return Ok("Comments");
+        //}
 
         [HttpGet]
-        public async Task<ActionResult<List<CommentDTO>>> Get(int libroId)
+        public async Task<ActionResult<List<CommentDTO>>> Get(int bookId)
         {
-            var book = await context.Books.AnyAsync(b => b.Id == libroId);
+            var book = await context.Books.AnyAsync(b => b.Id == bookId);
 
             if (!book)
             {
@@ -37,7 +37,7 @@ namespace SA.APILibrary.Controllers
             }
 
             var comments = await context.Comments
-                .Where(c => c.BookId == libroId)
+                .Where(c => c.BookId == bookId)
                 .OrderByDescending(c => c.PublishDate)
                 .ToListAsync();
 

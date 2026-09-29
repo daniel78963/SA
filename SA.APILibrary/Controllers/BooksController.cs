@@ -54,13 +54,13 @@ namespace SA.APILibrary.Controllers
         //        .Where(x => x.Title.Contains(title)).ToListAsync(); 
         //}
 
-        [HttpGet("{param1}/{param2?}")]
-        //public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
-        public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")
-        {
-            // Implementation for handling {param1}/{param2} route
-            return Ok(new { Param1 = param1, Param2 = param2 });
-        }
+        //[HttpGet("{param1}/{param2?}")]
+        ////public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
+        //public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")
+        //{
+        //    // Implementation for handling {param1}/{param2} route
+        //    return Ok(new { Param1 = param1, Param2 = param2 });
+        //}
 
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] BookCreationDTO bookCreationDto)

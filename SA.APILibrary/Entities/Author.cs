@@ -19,7 +19,7 @@ namespace SA.APILibrary.Entities
         [StringLength(20, ErrorMessage = "The field {0} must be at most {1} characters long")]
         public required string Document { get; set; }
 
-        public List<Book> Books { get; set; } = new List<Book>();
+        public List<AuthorBook> Books { get; set; } = [];
 
         //[Range(1, 150, ErrorMessage = "The field {0} must be between {1} and {2}")]
         //public int Age { get; set; }

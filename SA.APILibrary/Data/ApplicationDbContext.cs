@@ -29,7 +29,16 @@ namespace SA.APILibrary.Data
         public DbSet<Author> Authors { get; set; }
         public DbSet<Book> Books  { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<AuthorBook> AuthorBooks { get; set; }
+
+        //Nugets: Microsoft.EntityFrameworkCore.SqlServer
+        //Microsoft.EntityFrameworkCore.Tools
+        //Microsoft.EntityFrameworkCore.Tools
+
         //Add-Migration TableBooks
         //Update-Database
+
+        //Add-Migration Inicial -Project Incubator.Infrastructure -StartupProject Incubator.Desktop
+        //Update-Database -Project Incubator.Infrastructure -StartupProject Incubator.Desktop
     }
 }

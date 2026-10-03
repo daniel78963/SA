@@ -25,7 +25,7 @@ namespace SA.APILibrary.Controllers
         public async Task<IEnumerable<BookDTO>> Get()
         {
             var books = await _context.Books
-                .Include(x => x.Author)
+                .Include(x => x.Authors)
                 .ToListAsync();
             var booksDto = _mapper.Map<IEnumerable<BookDTO>>(books);
             return booksDto;
@@ -36,7 +36,7 @@ namespace SA.APILibrary.Controllers
         //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
             var book = await _context.Books
-                .Include(x => x.Author)
+                .Include(x => x.Authors)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (book is null)
             {
@@ -46,34 +46,56 @@ namespace SA.APILibrary.Controllers
             return Ok(bookDto);
         }
 
-        //[HttpGet("{title:alpha}")] //esto es para que solo acepte letras, si se pone un numero no lo aceptara 
-        //public async Task<IEnumerable<Book>> Get(string title)
-        //{
-        //    return await _context.Books
-        //        .Include(x => x.Author)
-        //        .Where(x => x.Title.Contains(title)).ToListAsync(); 
-        //}
+        ////[HttpGet("{title:alpha}")] //esto es para que solo acepte letras, si se pone un numero no lo aceptara 
+        ////public async Task<IEnumerable<Book>> Get(string title)
+        ////{
+        ////    return await _context.Books
+        ////        .Include(x => x.Author)
+        ////        .Where(x => x.Title.Contains(title)).ToListAsync(); 
+        ////}
 
-        //[HttpGet("{param1}/{param2?}")]
-        ////public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
-        //public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")
-        //{
-        //    // Implementation for handling {param1}/{param2} route
-        //    return Ok(new { Param1 = param1, Param2 = param2 });
-        //}
+        ////[HttpGet("{param1}/{param2?}")]
+        //////public async Task<ActionResult> GetParam1Param2(string param1, string? param2)
+        ////public async Task<ActionResult> GetParam1Param2(string param1, string param2 = "default")
+        ////{
+        ////    // Implementation for handling {param1}/{param2} route
+        ////    return Ok(new { Param1 = param1, Param2 = param2 });
+        ////}
 
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] BookCreationDTO bookCreationDto)
         {
-            var book = _mapper.Map<Book>(bookCreationDto);
-            var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
-
-            if (!existingAuthor)
+            if (bookCreationDto.AuthorIds is null || bookCreationDto.AuthorIds.Count == 0)
             {
-                //return BadRequest("Invalid AuthorId");
-                ModelState.AddModelError(nameof(Book.AuthorId), "Invalid AuthorId");
+                ModelState.AddModelError(nameof(bookCreationDto.AuthorIds), "Doesn't have create a book without authors");
                 return ValidationProblem(ModelState);
             }
+
+            var authorsIdsExists = await _context.Authors
+                .Where(x => bookCreationDto.AuthorIds.Contains(x.Id))
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            if (authorsIdsExists.Count != bookCreationDto.AuthorIds.Count)
+            {
+                var invalidAuthorIds = bookCreationDto.AuthorIds.Except(authorsIdsExists).ToList();
+                var invalidAuthorIdsString = string.Join(", ", invalidAuthorIds);
+                ModelState.AddModelError(nameof(bookCreationDto.AuthorIds), 
+                    $"One or more provided AuthorIds are invalid: {invalidAuthorIdsString}");
+                return ValidationProblem(ModelState);
+            }
+
+            var book = _mapper.Map<Book>(bookCreationDto);
+            //already is more than one author, so we don't need to check if the author exists
+            //var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
+
+            //if (!existingAuthor)
+            //{
+            //    //return BadRequest("Invalid AuthorId");
+            //    ModelState.AddModelError(nameof(Book.AuthorId), "Invalid AuthorId");
+            //    return ValidationProblem(ModelState);
+            //}
+            AsignAuthorsOrder(book);
 
             _context.Add(book);
             await _context.SaveChangesAsync();
@@ -82,33 +104,44 @@ namespace SA.APILibrary.Controllers
             return new CreatedAtRouteResult("GetBook", new { id = book.Id }, bookDto);
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromBody] BookCreationDTO bookCreationDto)
+        private void AsignAuthorsOrder(Book book)
         {
-            var book = _mapper.Map<Book>(bookCreationDto);
-            book.Id = id; // Set the Id of the book to the provided id
-
-            //if (id != book.Id)
-            //{
-            //    return BadRequest("Differents Ids");
-            //}
-
-            var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
-
-            if (!existingAuthor)
+            if (book.Authors is not null)
             {
-                return BadRequest("Invalid AuthorId");
+                for (int i = 0; i < book.Authors.Count; i++)
+                {
+                    book.Authors[i].Order = i + 1;
+                }
             }
-
-            var existingBook = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
-            if (existingBook is null)
-            {
-                return NotFound();
-            }
-            _context.Entry(existingBook).CurrentValues.SetValues(book);
-            await _context.SaveChangesAsync();
-            return NoContent();
         }
+
+        //[HttpPut("{id:int}")]
+        //public async Task<ActionResult> Put(int id, [FromBody] BookCreationDTO bookCreationDto)
+        //{
+        //    var book = _mapper.Map<Book>(bookCreationDto);
+        //    book.Id = id; // Set the Id of the book to the provided id
+
+        //    //if (id != book.Id)
+        //    //{
+        //    //    return BadRequest("Differents Ids");
+        //    //}
+
+        //    var existingAuthor = await _context.Authors.AnyAsync(x => x.Id == book.AuthorId);
+
+        //    if (!existingAuthor)
+        //    {
+        //        return BadRequest("Invalid AuthorId");
+        //    }
+
+        //    var existingBook = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+        //    if (existingBook is null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    _context.Entry(existingBook).CurrentValues.SetValues(book);
+        //    await _context.SaveChangesAsync();
+        //    return NoContent();
+        //}
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)

@@ -17,9 +17,11 @@ namespace SA.APILibrary.Utilities
             CreateMap<Author, AuthorPatchDTO>().ReverseMap();
 
             CreateMap<Book, BookDTO>();
-            CreateMap<BookCreationDTO, Book>();
-            CreateMap<Book, BookWithAuthorDTO>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
+            CreateMap<BookCreationDTO, Book>()
+                .ForMember(dest => dest.Authors, opt => 
+                opt.MapFrom(dto => dto.AuthorIds.Select(id => new AuthorBook { AuthorId = id })));
+            //CreateMap<Book, BookWithAuthorDTO>()
+            //    .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
 
             CreateMap<Comment, CommentDTO>();
             CreateMap<CommentCreationDTO, Comment>();

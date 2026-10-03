@@ -7,6 +7,6 @@ namespace SA.APILibrary.DTOs
         [Required(ErrorMessage = "The field {0} is required")]
         [StringLength(250, ErrorMessage = "The field {0} must be at most {1} characters long")]
         public required string Title { get; set; }
-        public int AuthorId { get; set; }
+        public List<int> AuthorIds { get; set; } = [];
     }
 }

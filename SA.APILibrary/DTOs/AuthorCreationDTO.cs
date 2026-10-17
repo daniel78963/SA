@@ -17,5 +17,6 @@ namespace SA.APILibrary.DTOs
 
         [StringLength(20, ErrorMessage = "The field {0} must be at most {1} characters long")]
         public required string Document { get; set; }
+        public List<BookCreationDTO> Books { get; set; } = [];
     }
 }

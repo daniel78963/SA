@@ -15,10 +15,12 @@ namespace SA.APILibrary.Utilities
                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => MapAuthorName(src)));
             CreateMap<AuthorCreationDTO, Author>();
             CreateMap<Author, AuthorPatchDTO>().ReverseMap();
-
             CreateMap<AuthorBook, BookDTO>()
                 .ForMember(dto => dto.Id, opt => opt.MapFrom(ent => ent.BookId))
                 .ForMember(dto => dto.Title, opt => opt.MapFrom(src => src.Book!.Title));
+            CreateMap<AuthorBook, AuthorDTO>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AuthorId))
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
 
             CreateMap<Book, BookDTO>();
             CreateMap<BookCreationDTO, Book>()
@@ -28,9 +30,8 @@ namespace SA.APILibrary.Utilities
             //    .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
             CreateMap<Book, BookWithAuthorsDTO>()
                 .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => src.Authors.Select(ab => ab.Author)));
-            CreateMap<AuthorBook, AuthorDTO>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.AuthorId))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
+            CreateMap<BookCreationDTO, AuthorBook >()
+                .ForMember(ent => ent.Book, config => config.MapFrom(dto => new Book { Title = dto.Title }));
 
             CreateMap<Comment, CommentDTO>();
             CreateMap<CommentCreationDTO, Comment>();

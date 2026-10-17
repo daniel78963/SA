@@ -1,8 +1,0 @@
-﻿namespace SA.APILibrary.DTOs
-{
-    public class BookWithAuthorDTO : BookDTO
-    {
-        public int AuthorId { get; set; }
-        public required string AuthorName { get; set; }
-    }
-}

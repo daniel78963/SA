@@ -55,6 +55,7 @@ namespace SA.APILibrary.Controllers
         {
             var author = await context.Authors
                 .Include(x => x.Books)
+                .ThenInclude(x => x.Book)
                 .FirstOrDefaultAsync(x => x.Id == Id);
             if (author is null)
             {

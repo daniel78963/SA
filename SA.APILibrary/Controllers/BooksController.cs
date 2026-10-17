@@ -32,17 +32,18 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet("{id:int}", Name = "GetBook")] //api/autors/id?includeBooks=true
-        public async Task<ActionResult<BookWithAuthorDTO>> Get(int id)
+        public async Task<ActionResult<BookWithAuthorsDTO>> Get(int id)
         //public async Task<ActionResult<Book>> Get([FromRoute] int id, [FromQuery] bool includeBooks = false, [FromHeader] string? authorization)
         {
             var book = await _context.Books
                 .Include(x => x.Authors)
+                    .ThenInclude(x => x.Author)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (book is null)
             {
                 return NotFound();
             }
-            var bookDto = _mapper.Map<BookWithAuthorDTO>(book);
+            var bookDto = _mapper.Map<BookWithAuthorsDTO>(book);
             return Ok(bookDto);
         }
 
@@ -80,7 +81,7 @@ namespace SA.APILibrary.Controllers
             {
                 var invalidAuthorIds = bookCreationDto.AuthorIds.Except(authorsIdsExists).ToList();
                 var invalidAuthorIdsString = string.Join(", ", invalidAuthorIds);
-                ModelState.AddModelError(nameof(bookCreationDto.AuthorIds), 
+                ModelState.AddModelError(nameof(bookCreationDto.AuthorIds),
                     $"One or more provided AuthorIds are invalid: {invalidAuthorIdsString}");
                 return ValidationProblem(ModelState);
             }

@@ -7,10 +7,37 @@ namespace SA.APILibrary.Controllers
     public class ConfigurationsController : Controller
     {
         private readonly IConfiguration configuration;
+        private readonly IConfigurationSection section_01;
+        private readonly IConfigurationSection section_02;
 
         public ConfigurationsController(IConfiguration configuration)
         {
             this.configuration = configuration;
+            section_01 = configuration.GetSection("section_1");
+            section_02 = configuration.GetSection("section_2");
+        }
+
+        [HttpGet("section_01")]
+        public ActionResult<string> GetSection_01()
+        {
+            var name = section_01.GetValue<string>("name");
+            var age = section_01.GetValue<int>("age");
+            return Ok($"Name: {name}, Age: {age}");
+        }
+
+        [HttpGet("section_02")]
+        public ActionResult<string> GetSection_02()
+        {
+            var name = section_02.GetValue<string>("name");
+            var age = section_02.GetValue<int>("age");
+            return Ok($"Name: {name}, Age: {age}");
+        }
+
+        [HttpGet("GetAllSections")]
+        public ActionResult<string> GetAllSections()
+        {
+            var childs = section_02.GetChildren().Select(x => $"{x.Key}: {x.Value}");
+            return Ok(new { childs });
         }
 
         [HttpGet]

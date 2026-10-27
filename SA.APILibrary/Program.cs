@@ -2,12 +2,25 @@ using Microsoft.EntityFrameworkCore;
 using SA.APILibrary;
 using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var dicConfigurations = new Dictionary<string, string>
+{
+    { "test_dicConfigurations", "value of memory dictionary" }
+};
+builder.Configuration.AddInMemoryCollection(dicConfigurations!);
+
 //Area de servicios
 //builder.Services.AddControllers();
+builder.Services.AddOptions<PersonOptions>()
+    .Bind(builder.Configuration.GetSection(PersonOptions.Section))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+//.ValidateOnStart(); // this line is used to validate the options when the application starts. If the options are not valid, the application will not start and will throw an exception. This is useful to ensure that the application has valid configuration values before it starts running. It is especially useful for required options, as it will prevent the application from starting if the required options are not provided or are invalid.
+
+
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 
 builder.Services.AddTransient<TransientService>();

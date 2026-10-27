@@ -17,9 +17,13 @@ builder.Services.AddOptions<PersonOptions>()
     .Bind(builder.Configuration.GetSection(PersonOptions.Section))
     .ValidateDataAnnotations()
     .ValidateOnStart();
-
 //.ValidateOnStart(); // this line is used to validate the options when the application starts. If the options are not valid, the application will not start and will throw an exception. This is useful to ensure that the application has valid configuration values before it starts running. It is especially useful for required options, as it will prevent the application from starting if the required options are not provided or are invalid.
 
+builder.Services.AddOptions<RatesOptions>()
+    .Bind(builder.Configuration.GetSection(RatesOptions.Section))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddSingleton<PaymentProcess>(); //singleton because it is a service that will be used throughout the application and we want to keep the same instance of the service, so that when the rates change, the same instance of the service will be updated with the new rates. If we use transient or scoped, a new instance of the service will be created each time it is requested, and the rates will not be updated in the new instance. This is because transient and scoped services are created per request, and when a new request is made, a new instance of the service is created, and the old instance is discarded. Therefore, we use singleton to keep the same instance of the service throughout the application.
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 

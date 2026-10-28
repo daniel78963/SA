@@ -1,1 +1,29 @@
-﻿- Secretos de usuario de Win: %APPDATA%\Microsoft\UserSecrets\
+﻿API Library
+
+- Migrations
+Add-Migration xxx
+Update-Database
+
+- Secretos de usuario de Win: %APPDATA%\Microsoft\UserSecrets\
+
+Security
+- Identity:
+Nugets:
+Microsoft.AspNetCore.Identity.EntityFrameworkCore
+Microsoft.AspNetCore.Authentication.JwtBearer
+
+Add-Migration YourMigrationName -ErrorAction Ignore
+Or Remove 
+Of from project.csproj:     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.13" />
+
+For API we use ClaimsIdentity instead of Roles
+
+Update-Database
+
+In program: 
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<SA.APILibrary.Data.ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
+builder.Services.AddScoped<SignInManager<IdentityUser>>();
+builder.Services.AddHttpContextAccessor();

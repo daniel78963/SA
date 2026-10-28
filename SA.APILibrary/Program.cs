@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using SA.APILibrary;
 using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
@@ -45,6 +48,38 @@ builder.Services.AddDbContext<SA.APILibrary.Data.ApplicationDbContext>(options =
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+// Identity
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<SA.APILibrary.Data.ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+builder.Services.AddScoped<UserManager<IdentityUser>>(); // esto es necesario para poder crear usuarios y roles, ya que UserManager es el servicio que se encarga de manejar los usuarios y sus roles.
+builder.Services.AddScoped<SignInManager<IdentityUser>>(); // autenticar usuarios
+builder.Services.AddHttpContextAccessor(); // acceder al contexto HTTP desde cualquier clase.
+
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.MapInboundClaims = false; // esto es necesario para que los claims que vienen en el token no se mapeen a los claims de la identidad, ya que si se mapean, se pierden los claims originales y se reemplazan por los claims de la identidad. Esto es importante para poder acceder a los claims originales del token, ya que si se mapean, no se pueden acceder a ellos.
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+        ClockSkew = TimeSpan.Zero // esto es necesario para que el token no tenga un tiempo de vida adicional, ya que si se tiene un tiempo de vida adicional, el token puede ser usado después de su expiración, lo que puede ser un problema de seguridad. Esto es importante para poder invalidar el token inmediatamente después de su expiración, y evitar que sea usado después de su expiración. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el uso de un token expirado puede tener consecuencias graves.
+    }; // Con esto decimos cuales tokens son válidos y cuales no, y que se deben validar los claims del token para poder acceder a los recursos protegidos de la API. Esto es importante para poder proteger la API y evitar que usuarios no autorizados accedan a los recursos protegidos.
+});
+
+//ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//        ValidAudience = builder.Configuration["Jwt:Audience"],
+//      IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
 
 var app = builder.Build();
 

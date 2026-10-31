@@ -15,14 +15,54 @@ namespace SA.APILibrary.Controllers
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
+        private readonly SignInManager<IdentityUser> signInManager;
 
-        public UsersController(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public UsersController(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
         {
             this.userManager = userManager;
             this.configuration = configuration;
+            this.signInManager = signInManager;
+        }
+
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<AnswerAuthenticationDTO>> Login([FromBody] UserCredentialsDTO credentials)
+        {
+            var user = await userManager.FindByEmailAsync(credentials.Email!);
+            if (user == null)
+            {
+                return ReturnLoginIncorrect();
+            }
+
+            var result = await signInManager.CheckPasswordSignInAsync(user, credentials.Password!, lockoutOnFailure: false); // lockoutOnFailure: false: no bloquear al usuario después de varios intentos fallidos
+
+            if (result.Succeeded)
+            {
+                return await BuildToken(credentials);
+            }
+            else
+            {
+                return ReturnLoginIncorrect();
+            }
+
+            //var isPasswordValid = await userManager.CheckPasswordAsync(user, credentials.Password!);
+            //if (!isPasswordValid)
+            //{
+            //    return ReturnLoginIncorrect();
+            //}
+
+            //var answer = await BuildToken(credentials);
+            //return answer;
+        }
+
+        private ActionResult ReturnLoginIncorrect()
+        {
+            ModelState.AddModelError(string.Empty, "Login incorrect");
+            return ValidationProblem();
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<AnswerAuthenticationDTO>> Register([FromBody] UserCredentialsDTO credentials)
         {
             // Implementation for user registration
@@ -54,9 +94,9 @@ namespace SA.APILibrary.Controllers
             var user = await userManager.FindByEmailAsync(credentials.Email!);
             var claimsDB = await userManager.GetClaimsAsync(user!);
             claims.AddRange(claimsDB);
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["jwtkey"]!));
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expiration = DateTime.UtcNow.AddMinutes(10);
+            var expiration = DateTime.UtcNow.AddMinutes(10000);
             var token = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expiration, signingCredentials: creds);
             return new AnswerAuthenticationDTO()
             {

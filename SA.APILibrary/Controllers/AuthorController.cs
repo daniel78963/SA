@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/authors")]
+    [Authorize]
     public class AuthorController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -24,6 +26,7 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IEnumerable<AuthorDTO>> Get()
         {
             //logger.LogTrace("Getting all authors");

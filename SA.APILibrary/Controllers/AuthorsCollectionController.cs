@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
@@ -9,6 +10,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/authors-collection")]
+    [Authorize]
     public class AuthorsCollectionController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -23,7 +25,7 @@ namespace SA.APILibrary.Controllers
         [HttpGet("{ids}", Name = "GetAuthorsCollection")] // api/authors-collection/1,2,3
                                                           //public async Task<ActionResult<IEnumerable<AuthorDTO>>> Get([FromQuery] IEnumerable<int> ids)
         public async Task<ActionResult<IEnumerable<AuthorWithBooksDTO>>> Get(string ids)
-        { 
+        {
             //var idCollection = ids.Split(',').Select(int.Parse);
             var idsCollection = ids.Split(',').Select(id => int.TryParse(id, out var parsedId) ? parsedId : (int?)null);
             if (!idsCollection.Any())
@@ -33,7 +35,7 @@ namespace SA.APILibrary.Controllers
             }
 
             var authors = await context.Authors
-                .Include(x=> x.Books)
+                .Include(x => x.Books)
                 .ThenInclude(ab => ab.Book)
                 .Where(a => idsCollection.Contains(a.Id)).ToListAsync();
 

@@ -24,16 +24,17 @@ namespace SA.APILibrary.Utilities
 
             CreateMap<Book, BookDTO>();
             CreateMap<BookCreationDTO, Book>()
-                .ForMember(dest => dest.Authors, opt => 
+                .ForMember(dest => dest.Authors, opt =>
                 opt.MapFrom(dto => dto.AuthorIds.Select(id => new AuthorBook { AuthorId = id })));
             //CreateMap<Book, BookWithAuthorDTO>()
             //    .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => MapAuthorName(src.Author!)));
             CreateMap<Book, BookWithAuthorsDTO>()
                 .ForMember(dest => dest.Authors, opt => opt.MapFrom(src => src.Authors.Select(ab => ab.Author)));
-            CreateMap<BookCreationDTO, AuthorBook >()
+            CreateMap<BookCreationDTO, AuthorBook>()
                 .ForMember(ent => ent.Book, config => config.MapFrom(dto => new Book { Title = dto.Title }));
 
-            CreateMap<Comment, CommentDTO>();
+            CreateMap<Comment, CommentDTO>()
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User!.Email));
             CreateMap<CommentCreationDTO, Comment>();
             CreateMap<Comment, CommentPatchDTO>().ReverseMap();
         }

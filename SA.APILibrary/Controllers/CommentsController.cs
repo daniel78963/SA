@@ -39,6 +39,7 @@ namespace SA.APILibrary.Controllers
             }
 
             var comments = await context.Comments
+                .Include(c => c.User)
                 .Where(c => c.BookId == bookId)
                 .OrderByDescending(c => c.PublishDate)
                 .ToListAsync();
@@ -49,7 +50,9 @@ namespace SA.APILibrary.Controllers
         [HttpGet("{commentId}", Name = "GetComment")]
         public async Task<ActionResult<CommentDTO>> GetComment(Guid commentId)
         {
-            var comment = await context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+            var comment = await context.Comments
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == commentId);
 
             if (comment is null)
             {

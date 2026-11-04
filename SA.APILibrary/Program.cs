@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
 using SA.APILibrary;
 using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
+using SA.APILibrary.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +56,8 @@ builder.Services.AddIdentityCore<IdentityUser>()
 builder.Services.AddScoped<UserManager<IdentityUser>>(); // esto es necesario para poder crear usuarios y roles, ya que UserManager es el servicio que se encarga de manejar los usuarios y sus roles.
 builder.Services.AddScoped<SignInManager<IdentityUser>>(); // autenticar usuarios
 builder.Services.AddHttpContextAccessor(); // acceder al contexto HTTP desde cualquier clase.
+
+builder.Services.AddTransient<IUserServices, UserServices>();
 
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {

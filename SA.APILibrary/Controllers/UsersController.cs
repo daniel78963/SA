@@ -11,7 +11,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize]
+    //[Authorize]
     public class UsersController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
@@ -25,7 +25,7 @@ namespace SA.APILibrary.Controllers
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
-            this.userServices = userServices; 
+            this.userServices = userServices;
         }
 
         [HttpPost("login")]
@@ -110,6 +110,7 @@ namespace SA.APILibrary.Controllers
         }
 
         [HttpGet("refresh-token")]
+        [Authorize]
         public async Task<ActionResult<AnswerAuthenticationDTO>> RefreshToken()
         {
             var user = await userServices.GetCurrentUserAsync();
@@ -123,6 +124,46 @@ namespace SA.APILibrary.Controllers
             };
             var answerAuth = await BuildToken(credentials);
             return answerAuth;
+        }
+
+        [HttpPost("do-admin")]
+        [Authorize(Policy = "isadmin")] // esto se comenta mientras se hace al menos a un usuario como admin
+        public async Task<ActionResult> DoAdmin([FromBody] EditClaimDTO dto)
+        {
+            var user = await userManager.FindByEmailAsync(dto.Email!);
+            if (user is null)
+            {
+                return NotFound();
+            }
+            //var result = await userManager.AddToRoleAsync(user, "Admin");
+            //if (result.Succeeded)
+            //{
+            //    return Ok();
+            //}
+            //else
+            //{
+            //    foreach (var error in result.Errors)
+            //    {
+            //        ModelState.AddModelError(string.Empty, error.Description);
+            //    }
+            //    return ValidationProblem();
+            //}
+
+            await userManager.AddClaimAsync(user, new Claim("isadmin", "true"));
+            return NoContent();
+        }
+
+        [HttpPost("remove-admin")]
+        [Authorize(Policy = "isadmin")]
+        public async Task<ActionResult> RemoveAdmin([FromBody] EditClaimDTO dto)
+        {
+            var user = await userManager.FindByEmailAsync(dto.Email!);
+            if (user is null)
+            {
+                return NotFound();
+            } 
+            await userManager.RemoveClaimAsync(user, new Claim("isadmin", "true"));
+            return NoContent();
         }
     }
 }

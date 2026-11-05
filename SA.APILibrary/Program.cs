@@ -74,6 +74,11 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
         ClockSkew = TimeSpan.Zero // esto es necesario para que el token no tenga un tiempo de vida adicional, ya que si se tiene un tiempo de vida adicional, el token puede ser usado después de su expiración, lo que puede ser un problema de seguridad. Esto es importante para poder invalidar el token inmediatamente después de su expiración, y evitar que sea usado después de su expiración. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el uso de un token expirado puede tener consecuencias graves.
     }; // Con esto decimos cuales tokens son válidos y cuales no, y que se deben validar los claims del token para poder acceder a los recursos protegidos de la API. Esto es importante para poder proteger la API y evitar que usuarios no autorizados accedan a los recursos protegidos.
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("isadmin", policy => policy.RequireClaim("isadmin")); // esto es necesario para poder proteger los endpoints de la API, ya que si no se protege, cualquier usuario puede acceder a ellos. Esto es importante para poder proteger los recursos de la API y evitar que usuarios no autorizados accedan a ellos. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a los recursos protegidos puede tener consecuencias graves.
+});
+
 
 //ValidateIssuer = true,
 //        ValidateAudience = true,

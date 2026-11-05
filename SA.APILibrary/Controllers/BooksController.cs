@@ -10,7 +10,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "AdminPolicy")]
     public class BooksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

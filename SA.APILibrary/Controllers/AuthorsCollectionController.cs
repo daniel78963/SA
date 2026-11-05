@@ -10,7 +10,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/authors-collection")]
-    [Authorize]
+    [Authorize(Policy = "AdminPolicy")]
     public class AuthorsCollectionController : ControllerBase
     {
         private readonly ApplicationDbContext context;

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SA.APILibrary.DTOs;
+using SA.APILibrary.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -16,12 +17,15 @@ namespace SA.APILibrary.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<IdentityUser> signInManager;
+        private readonly IUserServices userServices;
 
-        public UsersController(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
+        public UsersController(UserManager<IdentityUser> userManager, IConfiguration configuration
+            , SignInManager<IdentityUser> signInManager, IUserServices userServices)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
+            this.userServices = userServices; 
         }
 
         [HttpPost("login")]
@@ -103,6 +107,22 @@ namespace SA.APILibrary.Controllers
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiration = expiration
             };
+        }
+
+        [HttpGet("refresh-token")]
+        public async Task<ActionResult<AnswerAuthenticationDTO>> RefreshToken()
+        {
+            var user = await userServices.GetCurrentUserAsync();
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+            var credentials = new UserCredentialsDTO()
+            {
+                Email = user.Email!
+            };
+            var answerAuth = await BuildToken(credentials);
+            return answerAuth;
         }
     }
 }

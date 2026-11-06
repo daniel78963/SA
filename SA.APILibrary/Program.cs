@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SA.APILibrary;
+using SA.APILibrary.Entities;
 using SA.APILibrary.Interfaces;
 using SA.APILibrary.Repositories;
 using SA.APILibrary.Services;
@@ -50,11 +51,11 @@ builder.Services.AddDbContext<SA.APILibrary.Data.ApplicationDbContext>(options =
 });
 
 // Identity
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<SA.APILibrary.Data.ApplicationDbContext>()
     .AddDefaultTokenProviders();
-builder.Services.AddScoped<UserManager<IdentityUser>>(); // esto es necesario para poder crear usuarios y roles, ya que UserManager es el servicio que se encarga de manejar los usuarios y sus roles.
-builder.Services.AddScoped<SignInManager<IdentityUser>>(); // autenticar usuarios
+builder.Services.AddScoped<UserManager<User>>(); // esto es necesario para poder crear usuarios y roles, ya que UserManager es el servicio que se encarga de manejar los usuarios y sus roles.
+builder.Services.AddScoped<SignInManager<User>>(); // autenticar usuarios
 builder.Services.AddHttpContextAccessor(); // acceder al contexto HTTP desde cualquier clase.
 
 builder.Services.AddTransient<IUserServices, UserServices>();

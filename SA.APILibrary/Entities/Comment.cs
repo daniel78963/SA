@@ -13,6 +13,6 @@ namespace SA.APILibrary.Entities
         //Propiedad de navegación para la relación con la entidad Book
         public Book? Book { get; set; }
         public required string UserId { get; set; }
-        public IdentityUser? User { get; set; }
+        public User? User { get; set; }
     }
 }

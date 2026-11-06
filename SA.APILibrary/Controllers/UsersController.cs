@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SA.APILibrary.DTOs;
+using SA.APILibrary.Entities;
 using SA.APILibrary.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,13 +15,13 @@ namespace SA.APILibrary.Controllers
     //[Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly SignInManager<User> signInManager;
         private readonly IUserServices userServices;
 
-        public UsersController(UserManager<IdentityUser> userManager, IConfiguration configuration
-            , SignInManager<IdentityUser> signInManager, IUserServices userServices)
+        public UsersController(UserManager<User> userManager, IConfiguration configuration
+            , SignInManager<User> signInManager, IUserServices userServices)
         {
             this.userManager = userManager;
             this.configuration = configuration;
@@ -70,7 +71,7 @@ namespace SA.APILibrary.Controllers
         public async Task<ActionResult<AnswerAuthenticationDTO>> Register([FromBody] UserCredentialsDTO credentials)
         {
             // Implementation for user registration
-            var user = new IdentityUser { UserName = credentials.Email, Email = credentials.Email };
+            var user = new User { UserName = credentials.Email, Email = credentials.Email };
             var result = await userManager.CreateAsync(user, credentials.Password!);
 
             if (result.Succeeded)
@@ -164,6 +165,31 @@ namespace SA.APILibrary.Controllers
             } 
             await userManager.RemoveClaimAsync(user, new Claim("isadmin", "true"));
             return NoContent();
+        }
+
+        [HttpPut("update-user")]
+        [Authorize]
+        public async Task<ActionResult> UpdateUser([FromBody] UpdateUserDTO dto)
+        {
+            var user = await userServices.GetCurrentUserAsync();
+            if (user is null)
+            {
+                return NotFound();
+            }
+            user.DateBirth = dto.DateBirth;
+            var result = await userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return ValidationProblem();
+            }
         }
     }
 }

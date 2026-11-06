@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using SA.APILibrary.Entities;
 
 namespace SA.APILibrary.Services
 {
     public class UserServices : IUserServices
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<User> userManager;
         private readonly IHttpContextAccessor contextAccessor;
 
-        public UserServices(UserManager<IdentityUser> userManager, IHttpContextAccessor contextAccessor)
+        public UserServices(UserManager<User> userManager, IHttpContextAccessor contextAccessor)
         { 
             //IHttpContextAccessor para poder acceder al contexto HTTP y obtener información sobre el usuario autenticado (claims)
             this.userManager = userManager;
             this.contextAccessor = contextAccessor;
         }
 
-        public async Task<IdentityUser?> GetCurrentUserAsync()
+        public async Task<User?> GetCurrentUserAsync()
         {
             var emailClaim = contextAccessor.HttpContext?.User?
                 .Claims.Where(c => c.Type == "email")

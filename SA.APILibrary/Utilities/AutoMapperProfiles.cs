@@ -37,6 +37,8 @@ namespace SA.APILibrary.Utilities
                 .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User!.Email));
             CreateMap<CommentCreationDTO, Comment>();
             CreateMap<Comment, CommentPatchDTO>().ReverseMap();
+
+            CreateMap<User, UserDTO>();
         }
 
         private string MapAuthorName(Author author) => $"{author.Names} {author.Surnames}";

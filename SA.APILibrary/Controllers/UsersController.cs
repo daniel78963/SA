@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SA.APILibrary.Data;
 using SA.APILibrary.DTOs;
 using SA.APILibrary.Entities;
 using SA.APILibrary.Services;
@@ -19,14 +22,19 @@ namespace SA.APILibrary.Controllers
         private readonly IConfiguration configuration;
         private readonly SignInManager<User> signInManager;
         private readonly IUserServices userServices;
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
         public UsersController(UserManager<User> userManager, IConfiguration configuration
-            , SignInManager<User> signInManager, IUserServices userServices)
+            , SignInManager<User> signInManager, IUserServices userServices
+            , ApplicationDbContext context, IMapper mapper)
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
             this.userServices = userServices;
+            this.context = context;
+            this.mapper = mapper;
         }
 
         [HttpPost("login")]
@@ -127,6 +135,20 @@ namespace SA.APILibrary.Controllers
             return answerAuth;
         }
 
+        [HttpGet]
+        [Authorize(Policy = "isadmin")]
+        public async Task<ActionResult<List<UserDTO>>> Get()
+        {
+            //var users = context.Users.Select(x => new UserDTO()
+            //{
+            //    Email = x.Email!,
+            //    DateBirth = x.DateBirth
+            //}).ToList();
+            var users = context.Users. ToListAsync();
+            var usersDTO = mapper.Map<List<UserDTO>>(await users);
+            return usersDTO;
+        }
+         
         [HttpPost("do-admin")]
         [Authorize(Policy = "isadmin")] // esto se comenta mientras se hace al menos a un usuario como admin
         public async Task<ActionResult> DoAdmin([FromBody] EditClaimDTO dto)

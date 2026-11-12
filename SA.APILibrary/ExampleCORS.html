@@ -22,6 +22,9 @@
 
             const json = await respuesta.text();
             console.log(json);
+
+            const headers = Array.from(respuesta.headers.entries());
+            console.log(headers);
         }
     </script>
 </body>

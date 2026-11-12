@@ -46,7 +46,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(AllowedOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .WithExposedHeaders("my-header");
     });
 });
 
@@ -139,6 +140,13 @@ var app = builder.Build();
 //    }
 //});
 //app.UseBlockRequestMiddleware(); //esto reemplaza las líneas de arriba. Esto es un middleware que se encarga de bloquear las peticiones que llegan a la API, y el status code de la respuesta. Se puede usar para bloquear peticiones maliciosas, o para bloquear peticiones que no cumplen con ciertos requisitos. Se puede usar para bloquear peticiones que no tienen autorización, o para bloquear peticiones que no tienen autenticación. Se puede usar para bloquear peticiones que no tienen permisos, o para bloquear peticiones que no tienen roles. Se puede usar para bloquear peticiones que no tienen claims, o para bloquear peticiones que no tienen scopes. Se puede usar para bloquear peticiones que no tienen tokens, o para bloquear peticiones que no tienen cookies. Se puede usar para bloquear peticiones que no tienen headers, o para bloquear peticiones que no tienen query strings. Se puede usar para bloquear peticiones que no tienen body, o para bloquear peticiones que no tienen form data. Se puede usar para bloquear peticiones que no tienen files, o para bloquear peticiones que no tienen streams. Se puede usar para bloquear peticiones que no tienen websockets, o para bloquear peticiones que no tienen server-sent events. Se puede usar para bloquear peticiones que no tienen gRPC, o para bloquear peticiones que no tienen SignalR. Se puede usar para bloquear peticiones que no tienen GraphQL, o para bloquear peticiones que no tienen OData. Se puede usar para bloquear peticiones que no tienen REST, o para bloquear peticiones que no tienen SOAP. Se puede usar para bloquear peticiones que no tienen XML, o para bloquear peticiones que no tienen JSON. Se puede usar para bloquear peticiones que no tienen CSV, o para bloquear peticiones que no tienen YAML. Se puede usar para bloquear peticiones que no tienen Protobuf, o para bloquear peticiones que no tienen Avro. Se puede usar para bloquear peticiones que no tienen Thrift, o para bloquear peticiones que no tienen Cap'n Proto. Se puede usar para bloquear peticiones que no tienen FlatBuffers, o para bloquear peticiones que no tienen MessagePack.
+
+app.Use(async (context, next) =>
+{
+    //context.Response.Headers.Add("X-Content-Type-Options", "nosniff"); //esto es necesario para evitar que el navegador haga sniffing del tipo de contenido de la respuesta, y así evitar ataques de tipo MIME sniffing. Esto es importante para evitar que el navegador ejecute código malicioso que se encuentre en la respuesta, y así evitar ataques de tipo XSS (Cross-Site Scripting). Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a la API desde otros orígenes puede tener consecuencias graves.+
+    context.Response.Headers.Append("my-header", "value");
+    await next();
+});
 
 app.UseCors(); //esto es necesario para que la API pueda ser consumida desde cualquier origen, ya que si no se pone, la API solo puede ser consumida desde el mismo origen, y no desde otros orígenes. Esto es importante para poder consumir la API desde aplicaciones web, móviles o de escritorio que estén en otros orígenes. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a la API desde otros orígenes puede tener consecuencias graves.
 app.MapControllers(); //le estamos diciendo que usemos los controladores para dar respuestas a las peticiones que lleguen a la API

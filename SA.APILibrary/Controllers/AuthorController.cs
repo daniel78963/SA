@@ -11,7 +11,7 @@ namespace SA.APILibrary.Controllers
 {
     [ApiController]
     [Route("api/authors")]
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize(Policy = "isadmin")]
     public class AuthorController : ControllerBase
     {
         private readonly ApplicationDbContext context;

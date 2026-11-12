@@ -16,6 +16,7 @@ var dicConfigurations = new Dictionary<string, string>
 builder.Configuration.AddInMemoryCollection(dicConfigurations!);
 
 //Area de servicios
+
 //builder.Services.AddControllers();
 builder.Services.AddOptions<PersonOptions>()
     .Bind(builder.Configuration.GetSection(PersonOptions.Section))
@@ -28,6 +29,26 @@ builder.Services.AddOptions<RatesOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 builder.Services.AddSingleton<PaymentProcess>(); //singleton because it is a service that will be used throughout the application and we want to keep the same instance of the service, so that when the rates change, the same instance of the service will be updated with the new rates. If we use transient or scoped, a new instance of the service will be created each time it is requested, and the rates will not be updated in the new instance. This is because transient and scoped services are created per request, and when a new request is made, a new instance of the service is created, and the old instance is discarded. Therefore, we use singleton to keep the same instance of the service throughout the application.
+
+var AllowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()!;
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyMethod()
+//              .AllowAnyHeader();
+//    });
+//});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(AllowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 
@@ -91,7 +112,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-//Area de middlewares
+//Area de middlewares 
 
 //app.MapGet("/", () => "Hello World!");
 
@@ -119,6 +140,7 @@ var app = builder.Build();
 //});
 //app.UseBlockRequestMiddleware(); //esto reemplaza las líneas de arriba. Esto es un middleware que se encarga de bloquear las peticiones que llegan a la API, y el status code de la respuesta. Se puede usar para bloquear peticiones maliciosas, o para bloquear peticiones que no cumplen con ciertos requisitos. Se puede usar para bloquear peticiones que no tienen autorización, o para bloquear peticiones que no tienen autenticación. Se puede usar para bloquear peticiones que no tienen permisos, o para bloquear peticiones que no tienen roles. Se puede usar para bloquear peticiones que no tienen claims, o para bloquear peticiones que no tienen scopes. Se puede usar para bloquear peticiones que no tienen tokens, o para bloquear peticiones que no tienen cookies. Se puede usar para bloquear peticiones que no tienen headers, o para bloquear peticiones que no tienen query strings. Se puede usar para bloquear peticiones que no tienen body, o para bloquear peticiones que no tienen form data. Se puede usar para bloquear peticiones que no tienen files, o para bloquear peticiones que no tienen streams. Se puede usar para bloquear peticiones que no tienen websockets, o para bloquear peticiones que no tienen server-sent events. Se puede usar para bloquear peticiones que no tienen gRPC, o para bloquear peticiones que no tienen SignalR. Se puede usar para bloquear peticiones que no tienen GraphQL, o para bloquear peticiones que no tienen OData. Se puede usar para bloquear peticiones que no tienen REST, o para bloquear peticiones que no tienen SOAP. Se puede usar para bloquear peticiones que no tienen XML, o para bloquear peticiones que no tienen JSON. Se puede usar para bloquear peticiones que no tienen CSV, o para bloquear peticiones que no tienen YAML. Se puede usar para bloquear peticiones que no tienen Protobuf, o para bloquear peticiones que no tienen Avro. Se puede usar para bloquear peticiones que no tienen Thrift, o para bloquear peticiones que no tienen Cap'n Proto. Se puede usar para bloquear peticiones que no tienen FlatBuffers, o para bloquear peticiones que no tienen MessagePack.
 
+app.UseCors(); //esto es necesario para que la API pueda ser consumida desde cualquier origen, ya que si no se pone, la API solo puede ser consumida desde el mismo origen, y no desde otros orígenes. Esto es importante para poder consumir la API desde aplicaciones web, móviles o de escritorio que estén en otros orígenes. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a la API desde otros orígenes puede tener consecuencias graves.
 app.MapControllers(); //le estamos diciendo que usemos los controladores para dar respuestas a las peticiones que lleguen a la API
 
 app.Run();

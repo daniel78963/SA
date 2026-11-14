@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using SA.APILibrary.Services;
 
 namespace SA.APILibrary.Controllers
 {
@@ -9,11 +10,21 @@ namespace SA.APILibrary.Controllers
     {
         private readonly IDataProtector protector;
         private readonly ITimeLimitedDataProtector protectorLimitedTime;
+        private readonly IServiceHash serviceHash;
 
-        public SecurityController(IDataProtectionProvider protectionProvider)
+        public SecurityController(IDataProtectionProvider protectionProvider
+            , IServiceHash serviceHash)
         {
             protector = protectionProvider.CreateProtector("SA.APILibrary.SecurityController"); // Esto no es la llave, es parte de la llave
             protectorLimitedTime = protector.ToTimeLimitedDataProtector();
+            this.serviceHash = serviceHash;
+        }
+
+        [HttpGet("hash")]
+        public IActionResult HashData([FromQuery] string data)
+        {
+            var hashedData = serviceHash.Hash(data);
+            return Ok(new { hashedData });
         }
 
         [HttpGet("protect")]

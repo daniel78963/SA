@@ -103,7 +103,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("isadmin", policy => policy.RequireClaim("isadmin")); // esto es necesario para poder proteger los endpoints de la API, ya que si no se protege, cualquier usuario puede acceder a ellos. Esto es importante para poder proteger los recursos de la API y evitar que usuarios no autorizados accedan a ellos. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a los recursos protegidos puede tener consecuencias graves.
 });
-
+builder.Services.AddTransient<IServiceHash, ServiceHash>(); //esto es necesario para poder usar el servicio de hash en la API, ya que si no se pone, no se puede usar el servicio de hash, y no se pueden proteger los datos sensibles de la API. Esto es importante para poder proteger los datos sensibles de la API, como por ejemplo contraseñas, tokens, etc. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a los datos sensibles puede tener consecuencias graves.
 
 //ValidateIssuer = true,
 //        ValidateAudience = true,

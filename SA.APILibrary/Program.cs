@@ -15,9 +15,11 @@ var dicConfigurations = new Dictionary<string, string>
 };
 builder.Configuration.AddInMemoryCollection(dicConfigurations!);
 
-//Area de servicios
+//Area de servicios 
 
 //builder.Services.AddControllers();
+builder.Services.AddDataProtection(); //esto es necesario para poder usar la protección de datos en la API, ya que si no se pone, no se puede usar la protección de datos, y no se pueden proteger los datos sensibles de la API. Esto es importante para poder proteger los datos sensibles de la API, como por ejemplo contraseñas, tokens, etc. Esto es especialmente importante en aplicaciones que manejan información sensible, como por ejemplo aplicaciones bancarias o de salud, donde el acceso a los datos sensibles puede tener consecuencias graves.
+
 builder.Services.AddOptions<PersonOptions>()
     .Bind(builder.Configuration.GetSection(PersonOptions.Section))
     .ValidateDataAnnotations()

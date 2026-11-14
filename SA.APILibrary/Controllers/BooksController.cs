@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SA.APILibrary.Data;
@@ -15,11 +16,48 @@ namespace SA.APILibrary.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ITimeLimitedDataProtector protectorLimitByTime;
 
-        public BooksController(ApplicationDbContext context, IMapper mapper)
+        public BooksController(ApplicationDbContext context, IMapper mapper,
+            IDataProtectionProvider dataProtectionProvider)
         {
             _context = context;
             _mapper = mapper;
+            protectorLimitByTime = dataProtectionProvider.CreateProtector("SA.APILibrary.BooksController").ToTimeLimitedDataProtector();
+        }
+
+        [HttpGet("list/get-token")]
+        public async Task<IActionResult> GetTokenList()
+        {
+            var text = Guid.NewGuid().ToString();
+            var token = protectorLimitByTime.Protect(text, lifetime: TimeSpan.FromSeconds(30));
+            //var ulr = Url.RouteUrl("GetBook", new { id = 1, token = token }, Request.Scheme, Request.Host.ToString());
+            var ulr = Url.RouteUrl("GetListBooksUsingToken", new { token }, "https");
+            //return Ok(new { Token = token });
+            return Ok(new { ulr });
+        }
+
+        [HttpGet("list/{token}", Name = "GetListBooksUsingToken")]
+        [AllowAnonymous]
+        public async Task<ActionResult> GetListBooksUsingToken(string token)
+        {
+            //El método Get() está protegido. Este GetListBooksUsingToken está protegido por un token que expira en 30 segundos. Si el token no es válido o ha expirado, se lanzará una excepción y se devolverá un error 400.
+            // Sirve para darle acceso a alguien que no es admin a ver la lista de libros, pero solo por un tiempo limitado.
+            try
+            {
+                protectorLimitByTime.Unprotect(token);
+            }
+            catch  
+            {
+                 ModelState.AddModelError(nameof(token), "Invalid or expired token");
+                return ValidationProblem();
+            }
+            
+            var books = await _context.Books
+                .Include(x => x.Authors)
+                .ToListAsync();
+            var booksDto = _mapper.Map<IEnumerable<BookDTO>>(books);
+            return Ok(booksDto);
         }
 
         [HttpGet]
